@@ -4,7 +4,7 @@ var IceServersHandler = (function() {
     function getIceServers(connection) {
         
         //xirsys
-        var iceServers: [{
+        var iceServers = [{
            urls: [ "stun:tk-turn2.xirsys.com" ]
         }, {
            username: "c9b737fe-eb95-11e8-b776-324f0cea1457",
