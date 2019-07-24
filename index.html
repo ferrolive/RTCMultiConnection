@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link href="https://fonts.googleapis.com/css?family=Dosis:400,500,700" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/demos/stylesheet.css">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -367,127 +368,6 @@ function remove(lastMessageUUID) {
         removed: true
     });
 }
-
-// ......................................................
-// ................DB calls.............
-// ......................................................
-
-// function addRoom(service_name, code, participant_type, participant_id, token){
-//     var xhr = new XMLHttpRequest();
-//     var url = "/room/"+code+"/"+service_name;
-//     xhr.onreadystatechange = function() { // Call a function when the state changes.
-//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-//             var response = JSON.parse(xhr.responseText);
-//             var roomi = response.id;
-//             localStorage.setItem('roomid',roomi);            
-//             console.log("room added to database: "+response.id);
-//             addParticipant(participant_type, participant_id, roomi, token);
-//         }
-//     }
-//     xhr.open("GET", url, true);
-//     xhr.setRequestHeader("Content-Type", "application/json");
-//     xhr.setRequestHeader("x-access-token", token);
-//     xhr.send();
-// }
-
-// function addParticipant(participant_type, participant_id, room_id, token){
-//     var xhr = new XMLHttpRequest();
-//     var url = "/participant/"+participant_type+"/"+participant_id;
-//     xhr.onreadystatechange = function() { // Call a function when the state changes.
-//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-//             var response = JSON.parse(xhr.responseText);
-//             var particip_id = response.id;
-//             localStorage.setItem('particid',particip_id);
-//             console.log("participant added to database: "+particip_id);
-//             addRoomParticipant(room_id, particip_id, token);
-//         }
-//     }
-//     xhr.open("GET", url, true);    
-//     xhr.setRequestHeader("Content-Type", "application/json");
-//     xhr.setRequestHeader("x-access-token", token);
-//     xhr.send();
-// }
-
-// function addRoomParticipant(room_id, participant_id, token){
-//     var xhr = new XMLHttpRequest();
-//     var url = "/room_participant/"+room_id+"/"+participant_id;
-//     xhr.onreadystatechange = function() { // Call a function when the state changes.
-//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-//             var response = JSON.parse(xhr.responseText);
-//             var room_participant = response.id;
-//             console.log("room participant added to database: "+room_participant);
-//         }
-//     }
-//     xhr.open("GET", url, true);
-//     xhr.setRequestHeader("Content-Type", "application/json");
-//     xhr.setRequestHeader("x-access-token", token);
-//     xhr.send();
-// }
-
-// function addMessage(message){
-//     var token = localStorage.getItem('tk');
-//     var room_id = localStorage.getItem('roomid');
-//     var participant_id = localStorage.getItem('particid');
-
-//     var xhr = new XMLHttpRequest();
-//     var url = "/chat/"+room_id+"/"+participant_id+"/"+message;
-//     xhr.onreadystatechange = function() { // Call a function when the state changes.
-//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-//             // Request finished. Do processing here.
-//             console.log("message added to database");
-//         }
-//     }
-//     xhr.open("POST", url, true);
-//     xhr.setRequestHeader("Content-Type", "application/json");
-//     xhr.setRequestHeader("x-access-token", token);    
-//     xhr.send();
-// }
-
-// function addLog(details) {
-//     var token = localStorage.getItem('tk');
-//     var room_id = localStorage.getItem('roomid');
-//     var participant_id = localStorage.getItem('particid');
-//     var xhr = new XMLHttpRequest();
-//     var url = "/log/"+participant_id+"/"+room_id+"/"+details;
-//     xhr.onreadystatechange = function() { // Call a function when the state changes.
-//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-//             var response = JSON.parse(xhr.responseText);
-//             //console.log(response);
-//         }
-//     }
-//     xhr.open("POST", url, true);
-//     xhr.setRequestHeader("Content-Type", "application/json");
-//     xhr.setRequestHeader("x-access-token", token);
-//     xhr.send();
-// }
-
-// ......................................................
-// ..................Get ICE from Xirsys.................
-// ......................................................
-// function getIce(country='XX'){
-//     var token = localStorage.getItem('tk');
-//     var xhr = new XMLHttpRequest();
-//     var url = "/ice/"+country;
-//     xhr.onreadystatechange = function() { // Call a function when the state changes.
-//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-//             var response = JSON.parse(xhr.responseText);
-
-//             connection.iceServers.push({
-//                 urls: [response.v.iceServers.urls[0]]
-//             });
-
-//             connection.iceServers.push({
-//                 username: response.v.iceServers.username,
-//                 credential: response.v.iceServers.credential,
-//                 urls: response.v.iceServers.urls.splice(1,6)                
-//             });
-//         }
-//     }
-//     xhr.open("GET", url, true);
-//     xhr.setRequestHeader("Content-Type", "application/json");
-//     xhr.setRequestHeader("x-access-token", token);
-//     xhr.send();
-// }
 
 // ......................................................
 // ..................RTCMultiConnection Code.............

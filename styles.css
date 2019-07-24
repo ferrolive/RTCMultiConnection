@@ -1,0 +1,291 @@
+@charset "UTF-8";
+
+@font-face {
+  font-family: "webrtc";
+  src:url("fonts/webrtc.eot");
+  src:url("fonts/webrtc.eot?#iefix") format("embedded-opentype"),
+    url("fonts/webrtc.woff") format("woff"),
+    url("fonts/webrtc.ttf") format("truetype"),
+    url("fonts/webrtc.svg#webrtc") format("svg");
+  font-weight: normal;
+  font-style: normal;
+
+}
+
+[data-icon]:before {
+  font-family: "webrtc" !important;
+  content: attr(data-icon);
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  speak: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[class^="sbicon-"]:before,
+[class*=" sbicon-"]:before {
+  font-family: "webrtc" !important;
+  font-style: normal !important;
+  font-weight: normal !important;
+  font-variant: normal !important;
+  text-transform: none !important;
+  speak: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.sbicon-phone:before {
+  content: "\61";
+}
+.sbicon-comment:before {
+  content: "\62";
+}
+.sbicon-video-camera:before {
+  content: "\63";
+}
+.sbicon-comment-o:before {
+  content: "\64";
+}
+.sbicon-commenting:before {
+  content: "\65";
+}
+.sbicon-commenting-o:before {
+  content: "\66";
+}
+.sbicon-comments:before {
+  content: "\67";
+}
+.sbicon-comments-o:before {
+  content: "\68";
+}
+.sbicon-exclamation-triangle:before {
+  content: "\69";
+}
+.sbicon-exclamation-circle:before {
+  content: "\6a";
+}
+.sbicon-file-video-o:before {
+  content: "\6b";
+}
+.sbicon-thumbs-o-down:before {
+  content: "\71";
+}
+.sbicon-thumbs-o-up:before {
+  content: "\72";
+}
+.sbicon-times:before {
+  content: "\73";
+}
+.sbicon-volume-down:before {
+  content: "\74";
+}
+.sbicon-volume-off:before {
+  content: "\75";
+}
+.sbicon-volume-up:before {
+  content: "\76";
+}
+.sbicon-user-plus:before {
+  content: "\77";
+}
+.sbicon-user-times:before {
+  content: "\78";
+}
+.sbicon-play:before {
+  content: "\79";
+}
+.sbicon-play-circle:before {
+  content: "\7a";
+}
+.sbicon-play-circle-o:before {
+  content: "\41";
+}
+.sbicon-pause:before {
+  content: "\42";
+}
+.sbicon-square:before {
+  content: "\43";
+}
+.sbicon-square-o:before {
+  content: "\44";
+}
+.sbicon-trash:before {
+  content: "\45";
+}
+.sbicon-trash-o:before {
+  content: "\46";
+}
+.sbicon-microphone:before {
+  content: "\47";
+}
+.sbicon-microphone-slash:before {
+  content: "\48";
+}
+.sbicon-cloud-download:before {
+  content: "\49";
+}
+.sbicon-cloud-upload:before {
+  content: "\4a";
+}
+.sbicon-cog:before {
+  content: "\4b";
+}
+.sbicon-computer-network-streamline:before {
+  content: "\4c";
+}
+.sbicon-desktop:before {
+  content: "\4d";
+}
+.sbicon-screen-full:before {
+  content: "\4e";
+}
+.sbicon-screen-normal:before {
+  content: "\4f";
+}
+.sbicon-question-circle:before {
+  content: "\50";
+}
+.sbicon-sort:before {
+  content: "\51";
+}
+.sbicon-sliders:before {
+  content: "\52";
+}
+.sbicon-sort-asc:before {
+  content: "\53";
+}
+.sbicon-sort-desc:before {
+  content: "\54";
+}
+.sbicon-tags:before {
+  content: "\55";
+}
+.sbicon-wifi:before {
+  content: "\56";
+}
+.sbicon-pencil:before {
+  content: "\57";
+}
+.sbicon-pencil-square-o:before {
+  content: "\58";
+}
+.sbicon-pencil-1:before {
+  content: "\59";
+}
+.sbicon-pencil-2:before {
+  content: "\5a";
+}
+.sbicon-arrow-down:before {
+  content: "\30";
+}
+.sbicon-ban:before {
+  content: "\31";
+}
+.sbicon-bell:before {
+  content: "\32";
+}
+.sbicon-bell-slash:before {
+  content: "\33";
+}
+.sbicon-bell-o:before {
+  content: "\34";
+}
+.sbicon-bell-slash-o:before {
+  content: "\35";
+}
+.sbicon-check:before {
+  content: "\36";
+}
+.sbicon-check-circle:before {
+  content: "\37";
+}
+.sbicon-check-circle-o:before {
+  content: "\38";
+}
+.sbicon-chrome:before {
+  content: "\39";
+}
+.sbicon-firefox:before {
+  content: "\21";
+}
+.sbicon-safari:before {
+  content: "\22";
+}
+.sbicon-browser:before {
+  content: "\23";
+}
+.sbicon-browser-1:before {
+  content: "\24";
+}
+.sbicon-paperclip:before {
+  content: "\25";
+}
+.sbicon-paperclip-1:before {
+  content: "\26";
+}
+.sbicon-exclamation:before {
+  content: "\27";
+}
+.sbicon-share-alt:before {
+  content: "\28";
+}
+.sbicon-share-alt-square:before {
+  content: "\29";
+}
+.sbicon-fast-backward:before {
+  content: "\6c";
+}
+.sbicon-fast-forward:before {
+  content: "\6d";
+}
+.sbicon-flag:before {
+  content: "\6e";
+}
+.sbicon-flag-o:before {
+  content: "\6f";
+}
+.sbicon-forward:before {
+  content: "\70";
+}
+.sbicon-backward:before {
+  content: "\2a";
+}
+.sbicon-users:before {
+  content: "\2b";
+}
+.sbicon-user:before {
+  content: "\2c";
+}
+
+.btn-circle.btn-xl {
+    width: 70px;
+    height: 70px;
+    padding: 10px 16px;
+    border-radius: 35px;
+    font-size: 24px;
+    line-height: 1.33;
+}
+
+.btn-circle.btn-lg {
+    width: 50px;
+    height: 50px;
+    padding: 6px 0px;
+    border-radius: 25px;
+    text-align: center;
+    font-size: 20px;
+    line-height: 2.1500;
+}
+
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.42857;
+}
