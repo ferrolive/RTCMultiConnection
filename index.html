@@ -1,137 +1,493 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-  <script type="text/javascript">
-    if(location.protocol === 'http:' && document.domain === 'rtcmulticonnection.herokuapp.com') {
-      location.href = location.href.replace('http:', 'https:');
-    }
-  </script>
   <meta charset="utf-8">
-  <title>Video Conferencing using RTCMultiConnection</title>
+  <link rel="icon" href="data:;base64,=">
+  <title>Video Call</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <link rel="shortcut icon" href="/demos/logo.png">
+  <link href="https://fonts.googleapis.com/css?family=Dosis:400,500,700" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="/demos/stylesheet.css">
-  <script src="/demos/menu.js"></script>
 </head>
 <body>
-  <header>
-    <a class="logo" href="/"><img src="/demos/logo.png" alt="RTCMultiConnection"></a>
-    <a href="/" class="menu-explorer">Menu<img src="/demos/menu-icon.png" alt="Menu"></a>
-    <nav>
-      <li>
-        <a href="/">Home</a>
-      </li>
-      <li>
-        <a href="/demos/">Demos</a>
-      </li>
-      <li>
-        <a href="https://www.rtcmulticonnection.org/docs/getting-started/">Getting Started</a>
-      </li>
-      <li>
-        <a href="https://www.rtcmulticonnection.org/FAQ/">FAQ</a>
-      </li>
-      <li>
-        <a href="https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl">YouTube</a>
-      </li>
-      <li>
-        <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a>
-      </li>
-      <li>
-        <a href="https://github.com/muaz-khan/RTCMultiConnection">Github</a>
-      </li>
-    </nav>
-  </header>
 
-  <h1>
-    Video Conferencing using RTCMultiConnection
-    <p class="no-mobile">
-      Multi-user (many-to-many) video chat using mesh networking model.
-    </p>
-    <p>
-      <a href="https://www.npmjs.com/package/rtcmulticonnection"><img src="https://img.shields.io/npm/v/rtcmulticonnection.svg" /></a>
-          <a class="github-button" href="https://github.com/muaz-khan/RTCMultiConnection" data-show-count="true" aria-label="Star muaz-khan/RTCMultiConnection on GitHub">Star</a>
-          <a class="github-button" href="https://github.com/muaz-khan/RTCMultiConnection/issues" data-show-count="true" aria-label="Issue muaz-khan/RTCMultiConnection on GitHub">Issue</a>
-          <a class="github-button" href="https://github.com/muaz-khan/RTCMultiConnection/fork" data-show-count="true" aria-label="Fork muaz-khan/RTCMultiConnection on GitHub">Fork</a>
-          <a class="github-button" href="https://github.com/muaz-khan" data-show-count="true" aria-label="Follow @muaz-khan on GitHub">Follow @muaz-khan</a>
-          <a href="https://travis-ci.org/muaz-khan/RTCMultiConnection"><img src="https://travis-ci.org/muaz-khan/RTCMultiConnection.png?branch=master" /></a>
-    </p>
-  </h1>
+<h1 style="text-align: center;"></h1>
 
-  <section class="make-center">
-    <div>
-      <label><input type="checkbox" id="record-entire-conference"> Record Entire Conference In The Browser?</label>
-      <span id="recording-status" style="display: none;"></span>
-      <button id="btn-stop-recording" style="display: none;">Stop Recording</button>
-      <br><br>
-
-      <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20>
-      <button id="open-room">Open Room</button>
-      <button id="join-room">Join Room</button>
-      <button id="open-or-join-room">Auto Open Or Join Room</button>
+<section class="make-center" id="master-wrapper" style="display:none;">
+    <div id="room-wrap" style="display:nonex;">
+        <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20 style="display:nonex;">
+        <button id="open-room" style="display:nonex;">Open Room</button>
+        <button id="join-room" style="display:nonex;">Join Room</button>
     </div>
 
-    <div id="videos-container" style="margin: 20px 0;"></div>
+    <br><br>
+    <button id="share-file" style="display:none;" disabled>Share File</button>
+    <br><br>
 
     <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
-  </section>
+</section>
 
+<style>
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  -webkit-animation-name: fadeIn; /* Fade in the background */
+  -webkit-animation-duration: 0.4s;
+  animation-name: fadeIn;
+  animation-duration: 0.4s
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 30% !important; /* Could be more or less, depending on screen size */
+  text-align: center;
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
+
+<div id="myModal" class="modal">
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div id="call-wrapper"></div>
+  </div>
+</div>
+<script>
+var modal = document.getElementById("myModal");
+
+// // When the user clicks on <span> (x), close the modal
+// span.onclick = function() {
+//   modal.style.display = "none";
+// }
+
+// When the user clicks anywhere outside of the modal, close it
+// window.onclick = function(event) {
+//   if (event.target == modal) {
+//     modal.style.display = "none";
+//   }
+// }
+</script>
+
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <img src="./resources/img/logo.png" id="logo-img" style="height: 55px;padding-top:15px;"/>
+        </div>
+        <div class="col">
+            <button id="open-or-join-room" style="display:none;" class="btn btn-success btn-sm">
+                <div class="icon sbicon-phone"></div>
+            </button>&nbsp;
+            <button id="btn-leave-room" class="btn btn-danger btn-sm" style="display:none;" disabled>End Call</button>
+
+            <button id="accept-call" style="display:none;float:left;" class="btn btn-success btn-sm">
+                <div class="icon sbicon-phone">&nbsp;Accept Call</div>
+            </button>&nbsp;
+
+        
+            <!-- CALL BUTTON -->
+            <button id="new-open-video" style="float:right;margin-left:5px;" class="btn btn-success btn-circle btn-lg btn-sm" disabled>
+                <div class="icon sbicon-video-camera"></div>
+            </button>&nbsp;&nbsp;
+
+            <button id="hide-video" style="display:none;float:right;margin-left:5px" class="btn btn-danger btn-circle btn-lg btn-sm">
+                <div class="icon sbicon-video-camera"></div>
+            </button>&nbsp;
+
+            <!-- MUTE BUTTON -->
+            <button id="mute-audio" style="display:none;float:right;" class="btn btn-danger btn-circle btn-lg">
+                <div class="icon sbicon-microphone-slash"></div>
+            </button>&nbsp;
+
+            <button id="unmute-audio" style="display:none;float:right;" class="btn btn-success btn-circle btn-lg">
+                <div class="icon sbicon-microphone"></div>
+            </button>            
+
+        </div>
+    </div>
+    <hr/>
+    <div class="row">
+        <div class="col-sm-8" style="background-color: #e3e3e3; border-radius: 20px; min-height:480px;background-position: center center;background-image: url(./resources/img/logo.png);background-repeat: no-repeat;" id="videos-container"></div>
+        <div class="col-sm-4">
+            <div style="text-align: center;padding-bottom: 10px;" id="status-call"></div>
+            <div id="chat-container" style="max-height:520px; overflow:scroll; overflow-x: auto;">
+                <div class="chat-output"></div>
+            </div>
+            <input type="text" id="input-text-chat" class="form-control" placeholder="Enter Text Chat" disabled>    
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-8" style="text-align: center;">
+        
+        </div>
+        <div class="col-sm-4">
+
+        </div>
+    </div>
+</div>
+
+<script>
+    var local_name = null;
+    var remote_name = null;
+    var local_tz = null;
+    var remote_tz = null;
+    var saveLogs = false;
+    window.getExternalIceServers = true;
+</script>
+<!-- <script src="https://cdn.webrtc-experiment.com/getStats.js"></script> -->
+<script src="/dev/getStats.min.js"></script>
+<script src="/dev/IceServersHandler.js"></script>
 <script src="/dist/RTCMultiConnection.min.js"></script>
-<script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
-<script src="/socket.io/socket.io.js"></script>
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+<script src="hark.js"></script>
+<script src="/dev/lang.js"></script>
+<script src="/dev/moment-with-locales.js"></script>
+<script src="/dev/moment-timezone-with-data-1970-2030.js"></script>
 
 <!-- custom layout for HTML5 audio/video elements -->
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 <link rel="stylesheet" href="/dev/getHTMLMediaElement.css">
 <script src="/dev/getHTMLMediaElement.js"></script>
-
-<script src="/node_modules/recordrtc/RecordRTC.js"></script>
+<script src="/dev/FileBufferReader.js"></script>
 <script>
+var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+window.enableAdapter = true; // enable adapter.js
+
+var myAudio = new Audio('ring.mp3'); 
+function sound2($status="play") {
+    if (typeof myAudio.loop == 'boolean'){
+        myAudio.loop = true;
+    }else{
+        myAudio.addEventListener('ended', function() {
+            this.currentTime = 0;
+            if ($status == "play") {
+                this.play();    
+            } else {
+                this.pause();
+            }
+        }, false);
+    }
+    if ($status == "play") {
+        myAudio.play();
+    } else {
+        myAudio.pause();
+    }
+}
+
 // ......................................................
 // .......................UI Code........................
 // ......................................................
 document.getElementById('open-room').onclick = function() {
     disableInputButtons();
-    connection.open(document.getElementById('room-id').value, function(isRoomOpened, roomid, error) {
-        if(isRoomOpened === true) {
-          showRoomURL(connection.sessionid);
-        }
-        else {
-          disableInputButtons(true);
-          if(error === 'Room not available') {
-            alert('Someone already created this room. Please either join or create a separate room.');
-            return;
-          }
-          alert(error);
-        }
+    connection.open(document.getElementById('room-id').value, function() {
     });
 };
 
 document.getElementById('join-room').onclick = function() {
     disableInputButtons();
-    connection.join(document.getElementById('room-id').value, function(isJoinedRoom, roomid, error) {
-      if (error) {
-            disableInputButtons(true);
-            if(error === 'Room not available') {
-              alert('This room does not exist. Please either create it or wait for moderator to enter in the room.');
-              return;
-            }
-            alert(error);
-        }
-    });
+    connection.join(document.getElementById('room-id').value);
 };
 
 document.getElementById('open-or-join-room').onclick = function() {
     disableInputButtons();
-    connection.openOrJoin(document.getElementById('room-id').value, function(isRoomExist, roomid, error) {
-        if(error) {
-          disableInputButtons(true);
-          alert(error);
-        }
-        else if (connection.isInitiator === true) {
-            // if room doesn't exist, it means that current user will create the room
-            showRoomURL(roomid);
+    connection.openOrJoin(document.getElementById('room-id').value, function(isRoomExists, roomid) {
+        if (!isRoomExists) {
         }
     });
 };
+
+document.getElementById('btn-leave-room').onclick = function() {
+    this.disabled = true;
+
+    if (connection.isInitiator) {
+        // use this method if you did NOT set "autoCloseEntireSession===true"
+        // for more info: https://github.com/muaz-khan/RTCMultiConnection#closeentiresession
+        connection.closeEntireSession(function() {
+            document.querySelector('h1').innerHTML = 'Entire session has been closed.';
+        });
+    } else {
+        connection.leave();
+    }
+};
+
+// ......................................................
+// ................FileSharing/TextChat Code.............
+// ......................................................
+
+document.getElementById('share-file').onclick = function() {
+    var fileSelector = new FileSelector();
+    fileSelector.selectSingleFile(function(file) {
+        connection.send(file);
+    });
+};
+
+var numberOfKeys = 0;
+var lastMessageUUID;
+
+document.getElementById('input-text-chat').onkeyup = function(e) {
+    numberOfKeys++;
+
+    if (numberOfKeys > 3) {
+        numberOfKeys = 0;
+    }
+
+    if (!numberOfKeys) {
+        if (!lastMessageUUID) {
+            lastMessageUUID = Math.round(Math.random() * 999999999) + 9995000;
+        }
+
+        connection.send({
+            typing: true,
+            lastMessageUUID: lastMessageUUID
+        });
+    }
+
+    if (!this.value.replace(/^\s+|\s+$/g, '').length) {
+        connection.send({
+            stoppedTyping: true,
+            lastMessageUUID: lastMessageUUID
+        });
+        return;
+    }
+
+    if (e.keyCode != 13) return;
+
+    // removing trailing/leading whitespace
+    this.value = this.value.replace(/^\s+|\s+$/g, '');
+
+    if (this.value.split(" ").includes("skype")) {
+        alert('sorry, you cant use this word');
+    }
+    
+    //if (!this.value.length) return;
+
+    connection.send({
+        message: this.value,
+        lastMessageUUID: lastMessageUUID
+    });
+
+    var remotepeer = connection.extra.name;
+    if (remotepeer === remote_name ) {
+        appendDIV(this.value, lastMessageUUID, remote_name, remote_tz);
+    } else {
+        appendDIV(this.value, lastMessageUUID, local_name, local_tz);
+    }
+    lastMessageUUID = null;
+    this.value = '';
+};
+
+var chatContainer = document.querySelector('.chat-output');
+
+function appendDIV(event, messageUUID, user=null, tz=null) {
+    var existing = false, div, datespan;
+
+    datespan = document.createElement('span'); 
+    if (document.getElementById(messageUUID)) {
+        div = document.getElementById(messageUUID);
+        existing = true;
+    } else {        
+        div = document.createElement('div');
+        if (messageUUID) {
+            div.id = messageUUID;
+        }
+    }
+
+    if (user==null) {
+        user = remote_name;
+        div.style = "padding:2px;margin-bottom:2px;";  //display:table;
+    } else {
+        div.style = "color:#838383;font-style:italic;padding:2px;margin-bottom:2px;";   // display:table;
+        //addMessage(event.data || event); //save db 
+    }
+
+    //div.innerHTML = user + ": " + (event.data || event);
+    div.innerHTML = (event.data || event);
+    
+    if (tz) {
+        var times = new Date();
+        var datex = toTimeZone(times,tz);
+        datespan.innerHTML = datex;
+        datespan.style = "margin-top:6px;";
+        datespan.style.fontSize = "11px";
+        datespan.style.cssFloat = "right";
+    }
+
+    if (!existing) {
+        chatContainer.parentNode.insertBefore(div, chatContainer.firstChild);
+        //chatContainer.insertBefore(div, chatContainer.firstChild);
+    }
+
+    if (tz) {
+        div.appendChild(datespan);
+    }
+    
+    div.tabIndex = 0;
+    div.focus();
+
+    document.getElementById('input-text-chat').focus();
+}
+
+function modify(lastMessageUUID, modifiedValue) {
+    connection.send({
+        message: modifiedValue,
+        lastMessageUUID: lastMessageUUID,
+        modified: true
+    });
+}
+
+function remove(lastMessageUUID) {
+    connection.send({
+        lastMessageUUID: lastMessageUUID,
+        removed: true
+    });
+}
+
+// ......................................................
+// ................DB calls.............
+// ......................................................
+
+// function addRoom(service_name, code, participant_type, participant_id, token){
+//     var xhr = new XMLHttpRequest();
+//     var url = "/room/"+code+"/"+service_name;
+//     xhr.onreadystatechange = function() { // Call a function when the state changes.
+//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+//             var response = JSON.parse(xhr.responseText);
+//             var roomi = response.id;
+//             localStorage.setItem('roomid',roomi);            
+//             console.log("room added to database: "+response.id);
+//             addParticipant(participant_type, participant_id, roomi, token);
+//         }
+//     }
+//     xhr.open("GET", url, true);
+//     xhr.setRequestHeader("Content-Type", "application/json");
+//     xhr.setRequestHeader("x-access-token", token);
+//     xhr.send();
+// }
+
+// function addParticipant(participant_type, participant_id, room_id, token){
+//     var xhr = new XMLHttpRequest();
+//     var url = "/participant/"+participant_type+"/"+participant_id;
+//     xhr.onreadystatechange = function() { // Call a function when the state changes.
+//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+//             var response = JSON.parse(xhr.responseText);
+//             var particip_id = response.id;
+//             localStorage.setItem('particid',particip_id);
+//             console.log("participant added to database: "+particip_id);
+//             addRoomParticipant(room_id, particip_id, token);
+//         }
+//     }
+//     xhr.open("GET", url, true);    
+//     xhr.setRequestHeader("Content-Type", "application/json");
+//     xhr.setRequestHeader("x-access-token", token);
+//     xhr.send();
+// }
+
+// function addRoomParticipant(room_id, participant_id, token){
+//     var xhr = new XMLHttpRequest();
+//     var url = "/room_participant/"+room_id+"/"+participant_id;
+//     xhr.onreadystatechange = function() { // Call a function when the state changes.
+//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+//             var response = JSON.parse(xhr.responseText);
+//             var room_participant = response.id;
+//             console.log("room participant added to database: "+room_participant);
+//         }
+//     }
+//     xhr.open("GET", url, true);
+//     xhr.setRequestHeader("Content-Type", "application/json");
+//     xhr.setRequestHeader("x-access-token", token);
+//     xhr.send();
+// }
+
+// function addMessage(message){
+//     var token = localStorage.getItem('tk');
+//     var room_id = localStorage.getItem('roomid');
+//     var participant_id = localStorage.getItem('particid');
+
+//     var xhr = new XMLHttpRequest();
+//     var url = "/chat/"+room_id+"/"+participant_id+"/"+message;
+//     xhr.onreadystatechange = function() { // Call a function when the state changes.
+//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+//             // Request finished. Do processing here.
+//             console.log("message added to database");
+//         }
+//     }
+//     xhr.open("POST", url, true);
+//     xhr.setRequestHeader("Content-Type", "application/json");
+//     xhr.setRequestHeader("x-access-token", token);    
+//     xhr.send();
+// }
+
+// function addLog(details) {
+//     var token = localStorage.getItem('tk');
+//     var room_id = localStorage.getItem('roomid');
+//     var participant_id = localStorage.getItem('particid');
+//     var xhr = new XMLHttpRequest();
+//     var url = "/log/"+participant_id+"/"+room_id+"/"+details;
+//     xhr.onreadystatechange = function() { // Call a function when the state changes.
+//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+//             var response = JSON.parse(xhr.responseText);
+//             //console.log(response);
+//         }
+//     }
+//     xhr.open("POST", url, true);
+//     xhr.setRequestHeader("Content-Type", "application/json");
+//     xhr.setRequestHeader("x-access-token", token);
+//     xhr.send();
+// }
+
+// ......................................................
+// ..................Get ICE from Xirsys.................
+// ......................................................
+// function getIce(country='XX'){
+//     var token = localStorage.getItem('tk');
+//     var xhr = new XMLHttpRequest();
+//     var url = "/ice/"+country;
+//     xhr.onreadystatechange = function() { // Call a function when the state changes.
+//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+//             var response = JSON.parse(xhr.responseText);
+
+//             connection.iceServers.push({
+//                 urls: [response.v.iceServers.urls[0]]
+//             });
+
+//             connection.iceServers.push({
+//                 username: response.v.iceServers.username,
+//                 credential: response.v.iceServers.credential,
+//                 urls: response.v.iceServers.urls.splice(1,6)                
+//             });
+//         }
+//     }
+//     xhr.open("GET", url, true);
+//     xhr.setRequestHeader("Content-Type", "application/json");
+//     xhr.setRequestHeader("x-access-token", token);
+//     xhr.send();
+// }
 
 // ......................................................
 // ..................RTCMultiConnection Code.............
@@ -139,193 +495,547 @@ document.getElementById('open-or-join-room').onclick = function() {
 
 var connection = new RTCMultiConnection();
 
-// by default, socket.io server is assumed to be deployed on your own URL
+// by default, socket.io server is assumed to be deployed on your own roomURLsDiv
+// comment-out below line if you do not have your own socket.io server
 connection.socketURL = '/';
 
-// comment-out below line if you do not have your own socket.io server
-// connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+connection.socketMessageEvent = 'audio-video-file-chat-sb';
 
-connection.socketMessageEvent = 'video-conference-demo';
+connection.enableFileSharing = true; // by default, it is "false".
 
 connection.session = {
     audio: true,
-    video: true
+    video: true,
+    data: true
 };
+
+// connection.iceServers = [];
+// getIce();
+
+var forceTURN = true;
+if (forceTURN) {
+    connection.candidates = {
+        turn: true,
+        stun: false,
+        host: false
+    };
+    connection.iceTransportPolicy = 'relay';
+} else {
+    connection.candidates = {
+        turn: true,
+        stun: true,
+        host: true
+    };
+    connection.iceTransportPolicy = 'all';
+}
+
+// connection.bandwidth = {
+//     audio: 50,  // 50 kbps
+//     video: 256 // 256 kbps
+// };
 
 connection.sdpConstraints.mandatory = {
     OfferToReceiveAudio: true,
     OfferToReceiveVideo: true
 };
 
-// https://www.rtcmulticonnection.org/docs/iceServers/
-// use your own TURN-server here!
-connection.iceServers = [{
-    'urls': [
-        'stun:stun.l.google.com:19302',
-        'stun:stun1.l.google.com:19302',
-        'stun:stun2.l.google.com:19302',
-        'stun:stun.l.google.com:19302?transport=udp',
-    ]
-}];
+connection.processSdp = function(sdp) {return sdp;};
+connection.optionalArgument = {}; // ignore all DTLS/ipv6 parameters
+//connection.trickleIce=false;
+
+//connection.dontCaptureUserMedia = true;
+connection.dontAttachStream = true;
+//connection.dontGetRemoteStream = true;
 
 connection.videosContainer = document.getElementById('videos-container');
-connection.onstream = function(event) {
-    var existing = document.getElementById(event.streamid);
-    if(existing && existing.parentNode) {
-      existing.parentNode.removeChild(existing);
+
+connection.setUserPreferences = function(userPreferences) {
+    if (connection.dontAttachStream) {
+        // current user's streams will NEVER be shared with any other user
+        userPreferences.dontAttachLocalStream = true;
     }
 
+    if (connection.dontGetRemoteStream) {
+        // current user will NEVER receive any stream from any other user
+        userPreferences.dontGetRemoteStream = true;
+    }
+    return userPreferences;
+};
+
+connection.onstream = function(event) {
     event.mediaElement.removeAttribute('src');
     event.mediaElement.removeAttribute('srcObject');
-    event.mediaElement.muted = true;
-    event.mediaElement.volume = 0;
 
     var video = document.createElement('video');
-
-    try {
-        video.setAttributeNode(document.createAttribute('autoplay'));
-        video.setAttributeNode(document.createAttribute('playsinline'));
-    } catch (e) {
-        video.setAttribute('autoplay', true);
-        video.setAttribute('playsinline', true);
-    }
-
+    video.controls = false;
+    video.autoplay = true;
+    video.playsinline = true;
     if(event.type === 'local') {
-      video.volume = 0;
-      try {
-          video.setAttributeNode(document.createAttribute('muted'));
-      } catch (e) {
-          video.setAttribute('muted', true);
-      }
+        video.muted = true;
+        local_name = event.extra.name;
+        video.style.width = '150px';
+        video.style.borderRadius = '10px';
+        //connection.changeUserId(event.extra.user_id);
     }
     video.srcObject = event.stream;
 
-    var width = parseInt(connection.videosContainer.clientWidth / 3) - 20;
-    var mediaElement = getHTMLMediaElement(video, {
-        title: event.userid,
-        buttons: ['full-screen'],
-        width: width,
-        showOnMouseEnter: false
-    });
+    // var width = parseInt(connection.videosContainer.clientWidth / 2) - 20;
+    // var mediaElement = getHTMLMediaElement(video, {
+    //     //title: event.type === 'remote' ? remote_name : local_name,
+    //     buttons: ['full-screen'],
+    //     width: width,
+    //     showOnMouseEnter: false
+    // });
 
-    connection.videosContainer.appendChild(mediaElement);
+    var videoNew = document.getElementById(video.id);
+    if (videoNew) {
+        //video.replaceWith(event.mediaElement);
+        event.mediaElement.pause();
+        video.srcObject = event.stream;
+    } else {
+        connection.videosContainer.appendChild(video);
+    }
+    
+    if (event.type === 'remote') {
+        var heJoinedAt = new Date(event.extra.joinedAt).getTime();
+        var currentDate = new Date().getTime();
+        var latency = currentDate - heJoinedAt;
+        remote_name = event.extra.name;
+    }
+
+    //var h2 = document.createElement('h2');
+    //h2.innerHTML = event.extra.name;
+    //h2.id = "user-name";
+    //connection.videosContainer.appendChild(h2);
 
     setTimeout(function() {
-        mediaElement.media.play();
-    }, 5000);
+        //video.media.play();
+        video.play();
+        //connection.videosContainer.style = "background-color: #fff !important;";
+        // var promise = video.play();
 
-    mediaElement.id = event.streamid;
+        // if (promise !== undefined) {
 
-    // to keep room-id in cache
-    localStorage.setItem(connection.socketMessageEvent, connection.sessionid);
+        //   promise.then(_ => {
+        //     //console.log('started');
+        //   }).catch(error => {
+        //     //console.log('autoplay prevented');
+        //     //console.log('show a play, so user acn decide');
+        //   });
 
-    chkRecordConference.parentNode.style.display = 'none';
+        // }
 
-    if(chkRecordConference.checked === true) {
-      btnStopRecording.style.display = 'inline-block';
-      recordingStatus.style.display = 'inline-block';
+    }, 4000);
 
-      var recorder = connection.recorder;
-      if(!recorder) {
-        recorder = RecordRTC([event.stream], {
-          type: 'video'
-        });
-        recorder.startRecording();
-        connection.recorder = recorder;
-      }
-      else {
-        recorder.getInternalRecorder().addStreams([event.stream]);
-      }
+    // for iOS Safari
+    document.addEventListener('touchstart', function(e) {
+        var element = e.target;
+        if(element.id == event.streamid){
+            element.play();
+        }        
+    }, false);
 
-      if(!connection.recorder.streams) {
-        connection.recorder.streams = [];
-      }
+    video.id = event.streamid;
+    video.setAttribute('data-userid', event.userid);
+    //mediaElement.id = event.streamid;
 
-      connection.recorder.streams.push(event.stream);
-      recordingStatus.innerHTML = 'Recording ' + connection.recorder.streams.length + ' streams';
+    // allow drag-and-drop for local video
+    dragElement(document.getElementById(event.streamid));
+
+    if (event.type === 'remote') {
+        video.style = "width: 100% !important;";
+        video.style.borderRadius = "25px";        
     }
 
     if(event.type === 'local') {
-      connection.socket.on('disconnect', function() {
-        if(!connection.getAllParticipants().length) {
-          location.reload();
-        }
-      });
+        video.style = "border-radius:5px;transform: rotateY(180deg);-webkit-transform:rotateY(180deg);-moz-transform:rotateY(180deg);position:absolute;width:180px;z-index:6;top:10px; left:25px;";
+        document.getElementById('mute-audio').style.display = "";
     }
+
+    initHark({
+        stream: event.stream,
+        streamedObject: event,
+        connection: connection
+    });
+
+    video.onclick = function() {
+        var streamid = this.id;
+        var userid = this.getAttribute('data-userid');
+        //var allVideosComingFromThisUser = connection.peers[userid].peer.getRemoteStreams();
+        var streamEvent = connection.streamEvents[streamid];
+        //console.log(streamEvent.type, streamEvent.stream.isScreen, streamEvent.stream, streamEvent.mediaElement);
+        console.log(streamEvent.type, streamEvent.stream.isScreen, streamEvent.stream, streamEvent.mediaElement);
+    }
+
+    // hide call button and show stop call button
+    // document.getElementById('new-open-video').style.display = "none";
+    // document.getElementById('hide-video').style.display = "";
+
 };
 
-var recordingStatus = document.getElementById('recording-status');
-var chkRecordConference = document.getElementById('record-entire-conference');
-var btnStopRecording = document.getElementById('btn-stop-recording');
-btnStopRecording.onclick = function() {
-  var recorder = connection.recorder;
-  if(!recorder) return alert('No recorder found.');
-  recorder.stopRecording(function() {
-    var blob = recorder.getBlob();
-    invokeSaveAsDialog(blob);
 
-    connection.recorder = null;
-    btnStopRecording.style.display = 'none';
-    recordingStatus.style.display = 'none';
-    chkRecordConference.parentNode.style.display = 'inline-block';
-  });
+connection.onspeaking = function (e) {
+    // e.streamid, e.userid, e.stream, etc.
+    //e.mediaElement.style.border = '1px solid red';
+    var element_mute = document.getElementById('mute-audio');
+    element_mute.style.border = '3px solid #E8AEB2';
 };
+
+connection.onsilence = function (e) {
+    // e.streamid, e.userid, e.stream, etc.
+    //e.mediaElement.style.border = '';
+    var element_mute = document.getElementById('mute-audio');
+    element_mute.style.border = '3px solid #dc3545';
+};
+
+connection.onvolumechange = function(event) {
+    event.mediaElement.style.borderWidth = event.volume;
+};
+
+function initHark(args) {
+    if (!window.hark) {
+        throw 'Please link hark.js';
+        return;
+    }
+
+    var connection = args.connection;
+    var streamedObject = args.streamedObject;
+    var stream = args.stream;
+    var options = {};
+    var speechEvents = hark(stream, options);
+
+    speechEvents.on('speaking', function() {
+        connection.onspeaking(streamedObject);
+    });
+
+    speechEvents.on('stopped_speaking', function() {
+        connection.onsilence(streamedObject);
+    });
+
+    speechEvents.on('volume_change', function(volume, threshold) {
+        streamedObject.volume = volume;
+        streamedObject.threshold = threshold;
+        connection.onvolumechange(streamedObject);
+    });
+}
+
+function createStreams() {
+    connection.addStream({
+        video: true,
+        oneway: true
+    });
+    //connection.videosContainer.style = "background-color: #fff !important;";
+    return;
+}
+
+function endStreams() {
+    connection.attachStreams.forEach(function(stream) {
+        stream.stop();     
+        //connection.videosContainer.style = "background-color: #e3e3e3 !important;";   
+        return;
+    });
+}
+
+connection.onmute = function(event) {
+    console.log(event);
+}
+
+document.getElementById('new-open-video').onclick = function() {
+    //createStreams();
+    connection.send({
+        startcall: true,            
+    });
+    // this.style.display = "none";
+    // document.getElementById('hide-video').style.display = "";
+}
+
+document.addEventListener("click", mainListener);
+
+function mainListener(event){
+    var element = event.target;
+    if(element.id == 'accepting-call'){        
+        element.style.display = "none";
+        createStreams();
+        sound2('stop');
+        modal.style.display = "none"; //hide modal
+
+        document.getElementById('new-open-video').style.display = "none";
+        document.getElementById('hide-video').style.display = "";
+
+        connection.send({
+            callaccepted: true,
+        });
+    }
+
+    if(element.id == 'refuse-call'){
+        element.style.display = "none";
+        sound2('stop');
+        modal.style.display = "none"; //hide modal
+    }
+}
+
+
+document.getElementById('hide-video').onclick = function() {
+    
+    endStreams();
+    connection.send({
+        endStreamForAll: true,            
+    });
+    this.style.display = "none";
+    document.getElementById('new-open-video').style.display = "block";
+} 
+
+
+//get streamID
+// connection.streamEvents.selectFirst({local:true}).streamid
+
+//get userID
+//connection.streamEvents.selectFirst({local:true}).userid
+
+
+document.getElementById('mute-audio').onclick = function() {
+
+    connection.attachStreams.forEach(function(stream) {
+        stream.mute();
+        return;
+    });
+    
+    this.style.display = "none";
+    document.getElementById('unmute-audio').style.display = "";
+
+} 
+
+document.getElementById('unmute-audio').onclick = function() {
+
+    connection.attachStreams.forEach(function(stream) {
+        stream.unmute();
+        return;
+    });
+    
+    this.style.display = "none";
+    document.getElementById('mute-audio').style.display = "";
+} 
+
 
 connection.onstreamended = function(event) {
-    var mediaElement = document.getElementById(event.streamid);
-    if (mediaElement) {
-        mediaElement.parentNode.removeChild(mediaElement);
+    // var mediaElement = document.getElementById(event.streamid);
+    // if (mediaElement) {
+    //     mediaElement.parentNode.removeChild(mediaElement);
+    // }
+    var video = document.getElementById(event.streamid);
+    if (video && video.parentNode) {
+        video.parentNode.removeChild(video);
     }
 };
 
-connection.onMediaError = function(e) {
-    if (e.message === 'Concurrent mic process limit.') {
-        if (DetectRTC.audioInputDevices.length <= 1) {
-            alert('Please select external microphone. Check github issue number 483.');
-            return;
+function insertAfter(newNode, referenceNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
+
+connection.onmessage = function(event) {
+
+    if (event.data.startcall) {
+
+        modal.style.display = "block"; //show modal
+        
+        var btncall = document.getElementById("accepting-call");
+        var btnend = document.getElementById("refuse-call");
+        var item = document.getElementById('call-wrapper');
+        var icon = document.createElement('div');
+        icon.className = "icon sbicon-video-camera";
+
+        if (btncall) {
+            sound2(); //ringtone
+            //btncall.appendChild(icon);
+            btncall.style.display = "inline-block";
+            
+        } else {
+            var buttonCall = document.createElement('button');
+            buttonCall.className = "btn btn-success btn-circle btn-lg btn-sm";
+            buttonCall.id = "accepting-call";
+            // buttonCall.appendChild(icon);
+            item.appendChild(buttonCall);
+            sound2(); //ringtone
+            //modal.style.display = "block"; //show modal
         }
 
-        var secondaryMic = DetectRTC.audioInputDevices[1].deviceId;
-        connection.mediaConstraints.audio = {
-            deviceId: secondaryMic
-        };
+        if (btnend) {
+            //btnend.appendChild(icon);
+            btnend.style.display = "inline-block";
+        } else {
+            var buttonEnd = document.createElement('button');
+            buttonEnd.className = "btn btn-danger btn-circle btn-lg btn-sm";
+            buttonEnd.id = "refuse-call";
+            //buttonEnd.appendChild(icon);
+            item.appendChild(buttonEnd);
+        }
+        return;
 
-        connection.join(connection.sessionid);
     }
+
+    if (event.data.callaccepted) {
+
+        document.getElementById('new-open-video').style.display = "none";
+        document.getElementById('hide-video').style.display = "";
+    }
+
+    if (event.data.endStreamForAll) {
+        endStreams();
+        document.getElementById('new-open-video').style.display = "";
+        document.getElementById('hide-video').style.display = "none";
+    }
+
+    if (event.data.typing) {
+        appendDIV(remote_name + ' is typing..', event.data.lastMessageUUID);
+        return;
+    }
+
+    if (event.data.stoppedTyping) {
+        var div = document.getElementById(event.data.lastMessageUUID);
+        if (div) div.parentNode.removeChild(div);
+        return;
+    }
+
+    if (event.data.modified) {
+        var div = document.getElementById(event.data.lastMessageUUID);
+        if (div) {
+            div.innerHTML = event.data.message;
+        }
+        return;
+    }
+
+    if (event.data.removed) {
+        var div = document.getElementById(event.data.lastMessageUUID);
+        if (!div) return;
+        div.parentNode.removeChild(div);
+        return;
+    }
+
+    appendDIV(event.data.message, event.data.lastMessageUUID, null, local_tz);
 };
 
-// ..................................
-// ALL below scripts are redundant!!!
-// ..................................
+//connection.onmessage = appendDIV;
+connection.filesContainer = document.getElementById('file-container');
 
-function disableInputButtons(enable) {
-    document.getElementById('room-id').onkeyup();
+connection.onopen = function(event) {
+    document.getElementById('share-file').disabled = false;
+    document.getElementById('input-text-chat').disabled = false;
+    document.getElementById('btn-leave-room').disabled = false;
+    document.getElementById('new-open-video').disabled = false;
 
-    document.getElementById('open-or-join-room').disabled = !enable;
-    document.getElementById('open-room').disabled = !enable;
-    document.getElementById('join-room').disabled = !enable;
-    document.getElementById('room-id').disabled = !enable;
+    local_name = connection.extra.name;
+    remote_name = connection.peers[connection.getAllParticipants()[0]].extra.name;
+
+    local_tz = connection.extra.tz;
+    remote_tz = connection.peers[connection.getAllParticipants()[0]].extra.tz;
+
+    appendDIV(remote_name + translator.getStr("OnlineNow"), 'online-warn'+Math.floor(Math.random()*(999-100+1)+100), remote_name, local_tz);
+    //var warning_online = getElementById('online-warn').style.color = "#28a745";
+
+    // document.getElementById('status-call').innerHTML = remote_name + translator.getStr("OnlineNow");
+    // document.getElementById('status-call').style.color = "#28a745";
+    // document.getElementById('status-call').style.fontWeight = "600";
+};
+
+connection.onclose = function() {
+    if (connection.getAllParticipants().length) {
+        //document.querySelector('h1').innerHTML = 'You are still connected with: ' + connection.getAllParticipants().join(', ');
+        //document.getElementById("status-call").innerHTML = 'You are still connected with: ' + connection.getAllParticipants().join(', ');
+    } else {
+        // document.getElementById("status-call").innerHTML = translator.getStr("NoOneOnline");
+        // document.getElementById("status-call").style.color = "#212529";
+        // document.getElementById("status-call").style.fontWeight = "400";
+        appendDIV(translator.getStr("NoOneOnline"), 'offline-warn'+Math.floor(Math.random()*(999-100+1)+100), remote_name, local_tz);
+        //document.getElementById('new-open-video').style.display = "none";
+
+        document.getElementById('new-open-video').disabled = true;
+        //document.getElementById('mute-audio').style.display = "none";
+
+    }
+
+    alert('closed');
+};
+
+connection.onEntireSessionClosed = function(event) {
+    document.getElementById('share-file').disabled = true;
+    document.getElementById('input-text-chat').disabled = true;
+    document.getElementById('btn-leave-room').disabled = true;
+
+    document.getElementById('open-or-join-room').disabled = false;
+    document.getElementById('open-room').disabled = false;
+    document.getElementById('join-room').disabled = false;
+    document.getElementById('room-id').disabled = false;
+
+    connection.attachStreams.forEach(function(stream) {
+        stream.stop();
+    });
+
+    // don't display alert for moderator
+    if (connection.userid === event.userid) return;
+    //document.querySelector('h1').innerHTML = 'Entire session has been closed by the moderator: ' + event.userid;
+    //document.getElementById("status-call").innerHTML = "Entire session has been closed by the moderator.";
+
+    alert('closed all');
+};
+
+connection.onUserIdAlreadyTaken = function(useridAlreadyTaken, yourNewUserId) {
+    // seems room is already opened
+    connection.join(useridAlreadyTaken);
+};
+
+function disableInputButtons() {
+    document.getElementById('open-or-join-room').disabled = true;
+    document.getElementById('open-room').disabled = true;
+    document.getElementById('join-room').disabled = true;
+    document.getElementById('room-id').disabled = true;
 }
 
+// function loadChat() {
+//     var chat_container = document.getElementById("chat-container");    
+//     var this_partic = localStorage.getItem('particid');
+//     var tzone = localStorage.getItem('tz');
+//     var token = localStorage.getItem('tk');
+//     var room_id = localStorage.getItem('roomid');
+//     var xhr = new XMLHttpRequest();
+//     var url = "/chat/"+room_id;
+//     xhr.onreadystatechange = function() { // Call a function when the state changes.
+//         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+//             var response = JSON.parse(xhr.responseText);
+//             Object.keys(response).forEach(function(k){
+//                 var div = document.createElement('div');
+//                 var tspan = document.createElement('span');
+//                 div.id = 'ld'+k;
+
+//                 if (parseInt(response[k].participant_id) == parseInt(this_partic)) {
+//                     div.style = "color: rgb(131, 131, 131); font-style: italic; padding: 2px; margin-bottom: 2px;";
+//                 } else {
+//                     div.style = "padding:2px;margin-bottom:2px;";
+//                 }
+
+//                 var datex = moment.utc(response[k].created_at).tz(tzone).format("HH:mm A");
+//                 tspan.innerHTML = datex;
+//                 tspan.style = "margin-top:6px;";
+//                 tspan.style.fontSize = "11px";
+//                 tspan.style.cssFloat = "right";
+
+//                 div.innerHTML = response[k].message;
+//                 div.appendChild(tspan);                
+//                 chat_container.appendChild(div);
+//                 //console.log(k + ' - ' + response[k].message);
+//             });            
+//         }
+//     }
+//     xhr.open("GET", url, true);    
+//     xhr.setRequestHeader("Content-Type", "application/json");
+//     xhr.setRequestHeader("x-access-token", token);
+//     xhr.send();
+// }
+
+
 // ......................................................
-// ......................Handling Room-ID................
+// ......................Handling Params................
 // ......................................................
-
-function showRoomURL(roomid) {
-    var roomHashURL = '#' + roomid;
-    var roomQueryStringURL = '?roomid=' + roomid;
-
-    var html = '<h2>Unique URL for your room:</h2><br>';
-
-    html += 'Hash URL: <a href="' + roomHashURL + '" target="_blank">' + roomHashURL + '</a>';
-    html += '<br>';
-    html += 'QueryString URL: <a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
-
-    var roomURLsDiv = document.getElementById('room-urls');
-    roomURLsDiv.innerHTML = html;
-
-    roomURLsDiv.style.display = 'block';
-}
 
 (function() {
     var params = {},
@@ -340,6 +1050,29 @@ function showRoomURL(roomid) {
     window.params = params;
 })();
 
+function eventFire(el, etype){
+  if (el.fireEvent) {
+    el.fireEvent('on' + etype);
+  } else {
+    var evObj = document.createEvent('Events');
+    evObj.initEvent(etype, true, false);
+    el.dispatchEvent(evObj);
+  }
+}
+
+function makeid(req_id) {
+  var id = parseInt(req_id) * 299999984911 + 193353194;
+  return id.toString(36).replace('0.', '');
+}
+
+function isEmpty(obj) {
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+}
+
 var roomid = '';
 if (localStorage.getItem(connection.socketMessageEvent)) {
     roomid = localStorage.getItem(connection.socketMessageEvent);
@@ -347,10 +1080,10 @@ if (localStorage.getItem(connection.socketMessageEvent)) {
     roomid = connection.token();
 }
 
-var txtRoomId = document.getElementById('room-id');
-txtRoomId.value = roomid;
-txtRoomId.onkeyup = txtRoomId.oninput = txtRoomId.onpaste = function() {
-    localStorage.setItem(connection.socketMessageEvent, document.getElementById('room-id').value);
+
+document.getElementById('room-id').value = roomid;
+document.getElementById('room-id').onkeyup = function() {
+    localStorage.setItem(connection.socketMessageEvent, this.value);
 };
 
 var hashString = location.hash.replace('#', '');
@@ -358,47 +1091,210 @@ if (hashString.length && hashString.indexOf('comment-') == 0) {
     hashString = '';
 }
 
+var lang = params.lang;
 var roomid = params.roomid;
+var realroom = params.realroom;
+var token = params.t;
+var name = params.name;
 if (!roomid && hashString.length) {
     roomid = hashString;
 }
 
-if (roomid && roomid.length) {
-    document.getElementById('room-id').value = roomid;
-    localStorage.setItem(connection.socketMessageEvent, roomid);
+function toTimeZone(time, zone) {
+    //var format = 'YYYY/MM/DD HH:mm:ss ZZ';
+    var format = 'HH:mm A';
+    return moment(time, format).tz(zone).format(format);
+}
 
-    // auto-join-room
-    (function reCheckRoomPresence() {
-        connection.checkPresence(roomid, function(isRoomExist) {
-            if (isRoomExist) {
-                connection.join(roomid);
-                return;
-            }
 
-            setTimeout(reCheckRoomPresence, 5000);
+
+if (true) {
+    
+    document.getElementById("master-wrapper").style.display = "block";    
+
+    connection.extra = {
+        name: prompt("What is your nick?","Anonymous")
+    };
+
+    if (roomid && roomid.length) {
+        document.getElementById('room-id').value = roomid;
+        localStorage.setItem(connection.socketMessageEvent, roomid);
+
+        // auto-join-room
+        (function reCheckRoomPresence() {
+            connection.checkPresence(roomid, function(isRoomExists) {
+                if (isRoomExists) {
+                    connection.join(roomid);
+                    return;
+                }
+                setTimeout(reCheckRoomPresence, 4000);
+            });
+        })();
+
+        //disableInputButtons();
+    } else if (realroom && realroom.length) {
+
+        document.getElementById('room-id').value = realroom;
+        document.getElementById('room-id').onkeyup = function() {
+            localStorage.setItem(connection.socketMessageEvent, this.value);
+        };
+
+        //eventFire(document.getElementById('open-room'), 'click');
+        connection.open(realroom, function() {
+            //do something after open room
         });
-    })();
 
-    disableInputButtons();
+    } else {
+
+    }
 }
 
-// detect 2G
-if(navigator.connection &&
-   navigator.connection.type === 'cellular' &&
-   navigator.connection.downlinkMax <= 0.115) {
-  alert('2G is not supported. Please use a better internet service.');
+// Language Interface
+
+if (lang) {
+    var browserlang = lang;
+} else {
+    var browserlang = navigator.language || navigator.userLanguage;
 }
+
+var translator = new Language(getLanguageName(browserlang));
+
+document.getElementById("input-text-chat").placeholder = translator.getStr("EnterTextChat");
+document.getElementById("share-file").innerHTML = translator.getStr("ShareFile");
+document.getElementById("btn-leave-room").innerHTML = translator.getStr("LeaveRoom");
+//document.getElementById("status-call").innerHTML = translator.getStr("NoOneOnline");
+
+
+
+// if(navigator.connection &&
+//    navigator.connection.type === 'cellular' &&
+//    navigator.connection.downlinkMax <= 0.115) {
+//   alert('2G is not supported. Please use a better internet service.');
+// }
+
+
+if (!isFirefox) {
+    // ----------------------------------------------------
+    // getStats codes goes here
+    // ----------------------------------------------------
+
+    connection.onPeerStateChanged = function(event) {
+      if(event.iceConnectionState === 'connected' && event.signalingState === 'stable') {
+        if(connection.peers[event.userid].gettingStats === true) {
+          return;
+        }
+        connection.peers[event.userid].gettingStats = true; // do not duplicate
+        var peer = connection.peers[event.userid].peer;
+        var interval = 5000;
+        //console.log(peer);
+
+        if(DetectRTC.browser.name === 'Firefox') {
+          getStats(peer, peer.getLocalStreams()[0].getTracks()[0], function(stats) {
+            onGettingWebRTCStats(stats, event.userid);
+          }, interval);
+        } else {
+          getStats(peer, function(stats) {
+            onGettingWebRTCStats(stats, event.userid);
+          }, interval);
+        }
+      }
+    };
+    function onGettingWebRTCStats(stats, remoteUserId) {
+      if(!connection.peers[remoteUserId]) {
+        stats.nomore();
+      }
+      var statsData = 'UserID: ' + remoteUserId + '\n';
+      statsData += 'Bandwidth: ' + bytesToSize(stats.bandwidth.speed);
+      statsData += '\n';
+      statsData += 'Encryption: ' + stats.encryption;
+      statsData += '\n';
+      statsData += 'Codecs: ' + stats.audio.recv.codecs.concat(stats.video.recv.codecs).join(', ');
+      statsData += '\n';
+      statsData += 'Data: ' + bytesToSize(stats.audio.bytesReceived + stats.video.bytesReceived);
+      statsData += '\n';
+      statsData += 'ICE: ' + stats.connectionType.remote.candidateType.join(', ');
+      statsData += '\n';
+      statsData += 'Port: ' + stats.connectionType.remote.transport.join(', ');
+
+      if (saveLogs) {
+        addLog(statsData);  
+      }
+
+      //console.log(statsData);
+      
+      // var div = getDivByUserId(remoteUserId);
+      
+      // if(!div) {
+      //   return;
+      // }
+      // div.querySelector('h2').innerHTML = statsData.replace(/\n/g, '<br>');
+    }
+    function getDivByUserId(userid) {
+      return document.querySelector('[data-userid="' + userid + '"]');
+    }
+    function bytesToSize(bytes) {
+        var k = 1000;
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes === 0) {
+            return '0 Bytes';
+        }
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(k)), 10);
+        return (bytes / Math.pow(k, i)).toPrecision(3) + ' ' + sizes[i];
+    }
+
+}
+
+
+
+
+//dragElement(document.getElementById(""));
+
+function dragElement(elmnt) {
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  if (document.getElementById(elmnt.id + "header")) {
+    // if present, the header is where you move the DIV from:
+    document.getElementById(elmnt.id + "header").onmousedown = dragMouseDown;
+  } else {
+    // otherwise, move the DIV from anywhere inside the DIV: 
+    elmnt.onmousedown = dragMouseDown;
+  }
+
+  function dragMouseDown(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // get the mouse cursor position at startup:
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    // call a function whenever the cursor moves:
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e) {
+    e = e || window.event;
+    e.preventDefault();
+    // calculate the new cursor position:
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+  }
+
+  function closeDragElement() {
+    // stop moving when mouse button is released:
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
+
 </script>
-
-  <section style="text-align: center;">
-    <p>RTCMultiConnection is a WebRTC JavaScript library for peer-to-peer streaming (e.g. screen sharing, audio/video conferencing, file sharing, media streaming etc.)</p>
-  </section>
 
   <footer>
     <small id="send-message"></small>
   </footer>
 
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-  <script src="https://www.webrtc-experiment.com/common.js"></script>
 </body>
 </html>
