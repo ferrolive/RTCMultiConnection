@@ -260,7 +260,9 @@
 .sbicon-user:before {
   content: "\2c";
 }
-
+.sbicon-slash-cam:before {
+  content: "\2d";
+}
 .btn-circle.btn-xl {
     width: 70px;
     height: 70px;
