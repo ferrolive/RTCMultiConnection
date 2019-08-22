@@ -116,19 +116,10 @@ var modal = document.getElementById("myModal");
             </button>
 
             
-
-            
-
-        
             <!-- CALL BUTTON -->
-
             <button id="end-call" style="float:right;margin:5px;display:none;" class="btn btn-danger btn-round btn-lg"></button>
             <button id="call-audio" style="float:right;margin:5px;" class="btn btn-success btn-round btn-lg" disabled></button>
             <button id="call-video" style="float:right;margin:5px;" class="btn btn-success btn-round btn-lg" disabled></button>
-
-            <!-- <button id="new-open-video" style="float:right;margin-left:5px;" class="btn btn-success btn-circle btn-lg btn-sm" disabled>
-                <div class="icon sbicon-video-camera"></div>
-            </button> -->
 
             <button id="hide-video" style="display:none;float:right;margin:5px" class="btn btn-danger btn-circle btn-lg btn-sm">
                 <div class="icon sbicon-video-camera"></div>
@@ -145,15 +136,15 @@ var modal = document.getElementById("myModal");
 
             <button id="toggle-video" status="no" style="display:none;float:right;margin:5px" class="btn btn-success btn-circle btn-lg btn-sm">
                 <div class="icon sbicon-video-camera"></div>
-            </button>       
+            </button>
 
         </div>
     </div>
     <hr/>
     <style>
-        #videos-container {            
+        #videos-container {
             border-radius: 10px; 
-            /* min-height:480px; */
+            min-height:480px;
             background-image: url('./resources/img/bg.png');
             background-repeat: no-repeat;
             background-position: center center;
@@ -492,7 +483,7 @@ connection.setUserPreferences = function(userPreferences) {
 
 connection.onstream = function(event) {
     event.mediaElement.removeAttribute('src');
-    event.mediaElement.removeAttribute('srcObject');
+    event.mediaElement.removeAttribute('srcObject');    
 
     document.getElementById('mute-audio').style.display = "";
 
@@ -576,7 +567,6 @@ connection.onstream = function(event) {
             var userid = this.getAttribute('data-userid');
             //var allVideosComingFromThisUser = connection.peers[userid].peer.getRemoteStreams();
             var streamEvent = connection.streamEvents[streamid];
-            //console.log(streamEvent.type, streamEvent.stream.isScreen, streamEvent.stream, streamEvent.mediaElement);
             console.log(streamEvent.type, streamEvent.stream.isScreen, streamEvent.stream, streamEvent.mediaElement);
         }
 
@@ -660,12 +650,52 @@ function endStreams() {
     });
 }
 
-connection.onmute = function(e) {
+connection.onunmute = function(e) {
+
+    //console.log("onunmute",e);
     if (e.type === 'remote') {
+
+        var mutetag = document.getElementById("mutetag");
+        if (mutetag) {
+            mutetag.innerHTML = "";
+        }
+
+    }
+
+}
+
+connection.onmute = function(e) {
+
+    console.log("onmute",e);
+
+    if (e.type === 'remote') {
+
+        var mutetag = document.getElementById("mutetag");
+
+        if (mutetag) {
+            mutetag.innerHTML = "MUTE";
+        } else {
+
+            var mutetag = document.createElement("div");
+            mutetag.id = "mutetag";
+            mutetag.innerHTML = "MUTE";
+            connection.videosContainer.appendChild(mutetag);
+
+        }
+
+        
+
         //e.mediaElement.srcObject = null;
         //e.mediaElement.setAttribute('poster', 'photo.jpg');
         //alert(e.userid);
     }
+    // if (e.muteType === 'both' || e.muteType === 'video') {
+    //     e.mediaElement.src = null;
+    //     e.mediaElement.pause();
+    //     e.mediaElement.poster = e.snapshot || 'https://cdn.webrtc-experiment.com/images/muted.png';
+    // } else if (e.muteType === 'audio') {
+    //     e.mediaElement.muted = true;
+    // }
 }
 
 // document.getElementById('new-open-video').onclick = function() {
@@ -702,7 +732,8 @@ function mainListener(event){
 
         document.getElementById('end-call').style.display = "";
         document.getElementById('call-video').style.display = "none";
-        document.getElementById('call-audio').style.display = "none";          
+        document.getElementById('call-audio').style.display = "none";
+        document.getElementById('toggle-video').style.display = "";
 
         connection.send({
             callaccepted: true,
@@ -796,12 +827,15 @@ document.getElementById('toggle-video').onclick = function() {
         var tag = this.getElementsByTagName('div')[0];
         tag.classList.remove('sbicon-video-camera');
         tag.classList.add('sbicon-slash-cam');
-
+        
         connection.mediaConstraints.video = true;
+        connection.mediaConstraints.audio = false;
+        connection.removeStream();
         connection.addStream({
-            video: true, 
-            oneway: true
+            video: true,
+            audio: false
         });
+        connection.renegotiate();
 
     } else {
 
@@ -814,7 +848,7 @@ document.getElementById('toggle-video').onclick = function() {
         tag2.classList.add('sbicon-video-camera');
 
         connection.attachStreams.forEach(function(stream) {
-            stream.stop();
+            //stream.stop();
             connection.removeStream(stream.id);
             connection.renegotiate();
             return;
@@ -836,7 +870,7 @@ document.getElementById('toggle-video').onclick = function() {
 document.getElementById('mute-audio').onclick = function() {
 
     connection.attachStreams.forEach(function(stream) {
-        stream.mute();
+        stream.mute("audio");
         return;
     });
     
@@ -848,7 +882,7 @@ document.getElementById('mute-audio').onclick = function() {
 document.getElementById('unmute-audio').onclick = function() {
 
     connection.attachStreams.forEach(function(stream) {
-        stream.unmute();
+        stream.unmute("audio");
         return;
     });
     
@@ -869,6 +903,8 @@ connection.onstreamended = function(event) {
     if (video && video.parentNode) {
         video.parentNode.removeChild(video);
     }
+
+    //alert('a');
 };
 
 function insertAfter(newNode, referenceNode) {
@@ -1031,7 +1067,6 @@ connection.onclose = function() {
     if (connection.getAllParticipants().length) {
         //document.querySelector('h1').innerHTML = 'You are still connected with: ' + connection.getAllParticipants().join(', ');
         //document.getElementById("status-call").innerHTML = 'You are still connected with: ' + connection.getAllParticipants().join(', ');
-
         alert('Seems the user disconnected.');
     } else {
         // document.getElementById("status-call").innerHTML = translator.getStr("NoOneOnline");
@@ -1042,8 +1077,15 @@ connection.onclose = function() {
 
         //document.getElementById('new-open-video').disabled = true;
         document.getElementById('call-video').disabled = true;
+        document.getElementById('call-audio').disabled = true;
         //document.getElementById('mute-audio').style.display = "none";
 
+        document.getElementById('call-audio').style.display = "";
+        document.getElementById('call-video').style.display = "";
+
+        document.getElementById('end-call').style.display = "none";
+        document.getElementById('toggle-video').style.display = "none";
+        
         alert('Seems your connection failed. Refresh the page and try again.');
     }
 
@@ -1279,7 +1321,7 @@ if (!isFirefox) {
         addLog(statsData);  
       }
 
-      //console.log(statsData);
+      console.log(statsData);
       
       // var div = getDivByUserId(remoteUserId);
       
