@@ -58,7 +58,7 @@
    /* background-color: #fefefe; */
   margin: 15% auto; /* 15% from the top and centered */
   /*padding: 20px;*/
-  border: 1px solid #888;
+  /*border: 1px solid #888;*/
   width: 30% !important; /* Could be more or less, depending on screen size */
   text-align: center;
 }
@@ -108,7 +108,7 @@
         </button>
 
         <button id="refuse-call" style="margin-left:10px;" class="btn btn-danger btn-circle btn-lg btn-sm">
-            <div id="hang-down" class="icon sbicon-phone"></div>
+            <div id="hang-down" class="icon sbicon-phone-hang-up"></div>
         </button>
 
     </div>
@@ -981,7 +981,7 @@ connection.onmessage = function(event) {
         calltype = event.data.calltype;
 
         if(calltype == "audio"){
-            createStreams(false,true);
+            createStreams(true,true);
             document.getElementById("toggle-video").classList.remove('btn-danger');
             document.getElementById("toggle-video").classList.add('btn-success');
             document.getElementById("toggle-video").setAttribute("status", "no");

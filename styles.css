@@ -263,6 +263,9 @@
 .sbicon-slash-cam:before {
   content: "\2d";
 }
+.sbicon-phone-hang-up:before {
+  content: "\2e";
+}
 .btn-circle.btn-xl {
     width: 70px;
     height: 70px;
