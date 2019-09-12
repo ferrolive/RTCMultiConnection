@@ -55,9 +55,9 @@
 
 /* Modal Content/Box */
 .modal-content {
-  background-color: #fefefe;
+   /* background-color: #fefefe; */
   margin: 15% auto; /* 15% from the top and centered */
-  padding: 20px;
+  /*padding: 20px;*/
   border: 1px solid #888;
   width: 30% !important; /* Could be more or less, depending on screen size */
   text-align: center;
@@ -80,19 +80,43 @@
 .expired-wrapper {
     display: none;
 }
+
+#call-wrap{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    width:180px;
+    height:150px;
+    border-radius: 20px;
+    text-align: center;
+}
 </style>
 
 <div id="myModal" class="modal">
   <!-- Modal content -->
-  <div class="modal-content">
-    <div id="call-wrapper"></div>
+  <div class="modal-content">    
+    <div id="call-wrap">
+        <br/>
+        <span class="incoming-call">Incoming Call</span>
+        <br/><br/>
+        
+        <button id="accepting-call" class="btn btn-success btn-circle btn-lg btn-sm">
+            <div id="hang-up" class="icon sbicon-phone"></div>
+        </button>
 
+        <button id="refuse-call" style="margin-left:10px;" class="btn btn-danger btn-circle btn-lg btn-sm">
+            <div id="hang-down" class="icon sbicon-phone"></div>
+        </button>
+
+    </div>
     <div class="expired-wrapper"></div>
   </div>
 </div>
 <script>
 var modal = document.getElementById("myModal");
-
 // // When the user clicks on <span> (x), close the modal
 // span.onclick = function() {
 //   modal.style.display = "none";
@@ -139,7 +163,7 @@ var modal = document.getElementById("myModal");
 
             <button id="unmute-audio" style="display:none;float:right;margin:5px" class="btn btn-success btn-circle btn-lg">
                 <div class="icon sbicon-microphone"></div>
-            </button>     
+            </button>
 
             <button id="toggle-video" status="yes" style="display:none;float:right;margin:5px" class="btn btn-danger btn-circle btn-lg btn-sm">
                 <div class="icon sbicon-video-camera"></div>
@@ -672,7 +696,6 @@ function createStreams(video,audio) {
 }
 
 function endStreams() {
-    // connection.removeStream();
     connection.attachStreams.forEach(function(stream) {
         stream.stop();
     });
@@ -685,7 +708,6 @@ function endStreams() {
 
 connection.onunmute = function(e) {
 
-    //console.log("onunmute",e);
     if (e.type === 'remote') {
 
         var mutetag = document.getElementById("mutetag");
@@ -698,8 +720,6 @@ connection.onunmute = function(e) {
 }
 
 connection.onmute = function(e) {
-
-    // console.log("onmute",e);
 
     if (e.type === 'remote') {
 
@@ -718,13 +738,15 @@ connection.onmute = function(e) {
 }
 
 
-document.addEventListener("click", mainListener);
 
-function mainListener(event){
-    var element = event.target;
-    if(element.id == 'accepting-call'){
-        element.style.display = "none";
 
+
+
+
+document.getElementById('accepting-call').onclick = function(e) {
+    var element = document.getElementById("call-wrap");
+    element.style.display = "none";
+	
         calltype = element.getAttribute("call-type");
         if(calltype == "audio"){
             createStreams(true,true);
@@ -752,15 +774,45 @@ function mainListener(event){
             callaccepted: true,
             calltype: calltype
         });
-    }
 
-    if(element.id == 'refuse-call'){
-        element.style.display = "none";
-        sound2('stop');
-        modal.style.display = "none"; //hide modal
-    }
+
+
+    e.stopPropagation();
 }
 
+document.getElementById('refuse-call').onclick = function() {
+    var element = document.getElementById("call-wrap");
+    element.style.display = "none";
+    sound2('stop');
+    modal.style.display = "none"; //hide modal
+}
+
+// document.getElementById('accepting-audio').onclick = function(e) {
+
+//     sound2('stop');
+//     modal.style.display = "none"; //hide modal
+
+//     connection.mediaConstraints = {
+//         video: false,
+//         audio: true
+//     };
+//     connection.addStream({
+//         video: false,
+//         audio: true,
+//         oneway: true
+//     });
+
+//     document.getElementById('toggle-video').style.display = "";
+//     connection.send({
+//         audioaccepted: true
+//     });        
+
+//     document.getElementById('call-audio').style.display = "none";
+//     document.getElementById('call-video').style.display = "none";
+//     document.getElementById('end-call').style.display = "";
+
+//     e.stopPropagation();
+// }
 
 
 document.getElementById('hide-video').onclick = function() {    
@@ -769,8 +821,6 @@ document.getElementById('hide-video').onclick = function() {
         endStreamForAll: true,            
     });
     this.style.display = "none";
-
-    //document.getElementById('new-open-video').style.display = "block";
 }
 
 
@@ -860,10 +910,6 @@ document.getElementById('unmute-audio').onclick = function() {
     document.getElementById('mute-audio').style.display = "";
 } 
 
-
-
-
-
 connection.onstreamended = function(event) {
     var video = document.getElementById(event.streamid);
     if (video && video.parentNode) {
@@ -883,14 +929,14 @@ connection.onmessage = function(event) {
         
         var btncall = document.getElementById("accepting-call");
         var btnend = document.getElementById("refuse-call");
-        var item = document.getElementById('call-wrapper');
+        var item = document.getElementById('call-wrap');
         var icon = document.createElement('div');
         icon.className = "icon sbicon-video-camera";
 
         if (btncall) {
             sound2(); //ringtone
 
-            btncall.style.display = "inline-block";
+            item.style.display = "inline-block";
             if(event.data.videoCall){
                 calltype = "video";
                 btncall.setAttribute("call-type", "video");
@@ -932,8 +978,6 @@ connection.onmessage = function(event) {
     }
     if (event.data.callaccepted) {
 
-        //document.getElementById('new-open-video').style.display = "none";
-        // createStreams();
         calltype = event.data.calltype;
 
         if(calltype == "audio"){
@@ -950,7 +994,6 @@ connection.onmessage = function(event) {
         }
         
         document.getElementById('end-call').style.display = "";
-
         document.getElementById('call-video').style.display = "none";
         document.getElementById('call-audio').style.display = "none";
 
@@ -1228,12 +1271,10 @@ var translator = new Language(getLanguageName(browserlang));
 document.getElementById("input-text-chat").placeholder = translator.getStr("EnterTextChat");
 document.getElementById("share-file").innerHTML = translator.getStr("ShareFile");
 document.getElementById("btn-leave-room").innerHTML = translator.getStr("LeaveRoom");
-//document.getElementById("status-call").innerHTML = translator.getStr("NoOneOnline");
 
 document.getElementById("call-video").innerHTML = translator.getStr("CallVideo");
 document.getElementById("call-audio").innerHTML = translator.getStr("CallAudio");
 document.getElementById("end-call").innerHTML = translator.getStr("EndCall");
-
 
 
 // if(navigator.connection &&
@@ -1290,7 +1331,7 @@ if (!isFirefox) {
         addLog(statsData);  
       }
 
-      console.log(statsData);
+      //console.log(statsData);
       
       // var div = getDivByUserId(remoteUserId);
       
