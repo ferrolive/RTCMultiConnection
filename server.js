@@ -73,7 +73,7 @@ var config = {
   "socketCustomEvent": "RTCMultiConnection-Custom-Message",
   "port": 9001,
   "enableLogs": false,
-  "isUseHTTPs": false,
+  "isUseHTTPs": true,
   "enableAdmin": false
 };
 
