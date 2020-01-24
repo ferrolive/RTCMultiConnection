@@ -16,16 +16,19 @@
 
 <section class="make-center" id="master-wrapper" style="display:none;">
     <div id="room-wrap" style="display:nonex;">
-        <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20 style="display:nonex;">
-        <button id="open-room" style="display:nonex;">Open Room</button>
-        <button id="join-room" style="display:nonex;">Join Room</button>
+        <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20 style="display:nonex;" placeholder="Enter the room ID">
+        <button id="open-room" style="display:none;">Open Room</button>
+        <button id="join-room" style="display:none;">Join Room</button>
+        <button id="open-or-join-room" style="display:nonex;" class="btn btn-success btn-sm">
+            Open or Join Room
+        </button>
     </div>
+    <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
     <div id="msg"></div>
     <br><br>
     <button id="share-file" style="display:none;" disabled>Share File</button>
     <br><br>
 
-    <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
 </section>
 
 <style>
@@ -93,14 +96,88 @@
     border-radius: 20px;
     text-align: center;
 }
+
+
+.chat
+{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.chat li
+{
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted #B3A9A9;
+}
+
+.chat li.left .chat-body
+{
+    margin-left: 60px;
+}
+
+.chat li.right .chat-body
+{
+    margin-right: 60px;
+}
+
+
+.chat li .chat-body p
+{
+    margin: 0;
+    color: #777777;
+}
+
+.panel .slidedown .glyphicon, .chat .glyphicon
+{
+    margin-right: 5px;
+}
+.panel-heading{
+    background: #DF765E;
+    padding: 10px;
+    font-size: medium;
+    font-weight: bold;
+    color: white;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    text-align: center;
+}
+.panel-body
+{
+    overflow-y: scroll;
+    height: 450px;
+    border: 1px solid #ccc;
+}
+
+::-webkit-scrollbar-track
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar
+{
+    width: 12px;
+    background-color: #F5F5F5;
+}
+
+::-webkit-scrollbar-thumb
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+    background-color: #555;
+}
+.make-center {
+  text-align: center;
+}
 </style>
 
 <div id="myModal" class="modal">
   <!-- Modal content -->
-  <div class="modal-content">    
+  <div class="modal-content1">    
     <div id="call-wrap">
         <br/>
-        <span class="incoming-call">Incoming Call</span>
+        <span id="incoming-call" class="incoming-call">Incoming Call</span>
         <br/><br/>
         
         <button id="accepting-call" class="btn btn-success btn-circle btn-lg btn-sm">
@@ -110,13 +187,28 @@
         <button id="refuse-call" style="margin-left:10px;" class="btn btn-danger btn-circle btn-lg btn-sm">
             <div id="hang-down" class="icon sbicon-phone-hang-up"></div>
         </button>
-
     </div>
     <div class="expired-wrapper"></div>
-  </div>
+    </div>
 </div>
+<div id="callingModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content1">    
+      <div id="call-wrap">
+        <br/>
+        <span id="calling-call" class="calling-call">Calling</span>
+        <br/><br/>          
+        
+        <button class="btn btn-success btn-circle btn-lg btn-sm">
+            <div id="hang-up" class="icon sbicon-phone"></div>
+        </button>
+      </div>
+      <div class="expired-wrapper"></div>
+    </div>
+  </div>
 <script>
 var modal = document.getElementById("myModal");
+var callingModal = document.getElementById("callingModal");
 // // When the user clicks on <span> (x), close the modal
 // span.onclick = function() {
 //   modal.style.display = "none";
@@ -133,26 +225,24 @@ var modal = document.getElementById("myModal");
 
 <div class="container">
     <div class="row">
-        <div class="col">
-            <img src="./resources/img/logo.png" id="logo-img" style="height: 55px;padding-top:15px;"/>
+        <div class="col-lg-6 text-center">
+            <img src="./resources/img/logo_cafetalk.png" id="logo-img" style="height: 55px;padding-top:15px;"/>
         </div>
-        <div class="col">
-            <button id="open-or-join-room" style="display:none;" class="btn btn-success btn-sm">
-                <div class="icon sbicon-phone"></div>
-            </button>
+        <div class="col-lg-6 text-center">
+            
             <button id="btn-leave-room" class="btn btn-danger btn-sm" style="display:none;" disabled>End Call</button>
-
             <button id="accept-call" style="display:none;float:left;" class="btn btn-success btn-sm">
                 <div class="icon sbicon-phone">&nbsp;Accept Call</div>
             </button>
 
             
             <!-- CALL BUTTON -->
-            <button id="end-call" style="float:right;margin:5px;display:none;" class="btn btn-danger btn-round btn-lg"></button>
-            <button id="call-audio" style="float:right;margin:5px;" class="btn btn-success btn-round btn-lg" disabled></button>
-            <button id="call-video" style="float:right;margin:5px;" class="btn btn-success btn-round btn-lg" disabled></button>
+            <button id="end-call" style="float:right;margin:5px;display:none;" class="btn btn-danger btn-round "></button>
+            
+            <button id="call-audio" style="float:right;margin:5px;" class="btn btn-success btn-round"></button>
+            <button id="call-video" style="float:right;margin:5px;" class="btn btn-success btn-round"></button>
 
-            <button id="hide-video" style="display:none;float:right;margin:5px" class="btn btn-danger btn-circle btn-lg btn-sm">
+            <button id="hide-video" style="display:none;float:right;margin:5px" class="btn btn-danger btn-circle btn-sm">
                 <div class="icon sbicon-slash-cam"></div>
             </button>
 
@@ -172,6 +262,9 @@ var modal = document.getElementById("myModal");
             <select id="cameras"></select>
         </div>
     </div>
+    <div class="row grid-center">
+        <span id="call-status" class="alert alert-warning" role="alert">The other party is not online</span>
+    </div>
     <hr/>
     <style>
         #videos-container {
@@ -187,11 +280,30 @@ var modal = document.getElementById("myModal");
         <div class="col-8_sm-12" id="videos-container"></div>
         <div class="col">
             <div id="log-status"></div>
-            <div style="text-align: center;padding-bottom: 10px;" id="status-call"></div>
-            <div id="chat-container" style="max-height:520px; overflow:scroll; overflow-x: auto;">
-                <div class="chat-output"></div>
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    Chat Box
+                </div>
+                <div class="panel-body">
+                    <div id="chat-container" >
+                        <div class="chat-output"></div>
+                    </div>
+                </div>
+                <div class="panel-footer">
+                    <div class="input-group">
+                        <input type="text" id="input-text-chat" class="form-control" placeholder="Enter Text Chat">
+                        <!-- <input id="btn-input" type="text" class="form-control input-sm" placeholder="Type your message here..." />
+                        <span class="input-group-btn">
+                            <button class="btn btn-warning btn-sm" id="btn-chat">
+                                Send</button>
+                        </span> -->
+                    </div>
+                </div>
             </div>
-            <input type="text" id="input-text-chat" class="form-control" placeholder="Enter Text Chat" disabled>
+            
+            <div style="text-align: center;padding-bottom: 10px;" id="status-call"></div>
+            
+            
         </div>
     </div>
 </div>
@@ -225,29 +337,60 @@ var modal = document.getElementById("myModal");
 <script src="/dev/FileBufferReader.js"></script>
 <script>
 var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+//Load simple.js File if browser is not safari
+if(!isSafari){
+    document.write('<script src="/dev/simpleStats.js"><\/script>');    
+}
+
 var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 window.enableAdapter = true; // enable adapter.js
 
 var myAudio = new Audio('ring.mp3'); 
-function sound2($status="play") {
-    if (typeof myAudio.loop == 'boolean'){
-        myAudio.loop = true;
-    }else{
-        myAudio.addEventListener('ended', function() {
-            this.currentTime = 0;
-            if ($status == "play") {
-                this.play();    
-            } else {
-                this.pause();
-            }
-        }, false);
+if (isSafari) {
+
+    function sound2($status="play") {
+        var promise = myAudio.play();
+
+        if (promise !== undefined) {
+            promise.catch(error => {
+                // Auto-play was prevented
+                // Show a UI element to let the user manually start playback
+                myAudio.play();
+            }).then(() => {
+                // Auto-play started
+            });
+        }
+    }    
+
+} else {
+
+    function sound2($status="play") {
+        if (typeof myAudio.loop == 'boolean'){
+            myAudio.loop = true;
+        }else{
+            myAudio.addEventListener('ended', function() {
+                this.currentTime = 0;
+                if ($status == "play") {
+                    this.play();    
+                } else {
+                    this.pause();
+                }
+            }, false);
+        }
+        if ($status == "play") {
+            myAudio.play();
+        } else {
+            myAudio.pause();
+        }
     }
-    if ($status == "play") {
-        myAudio.play();
-    } else {
-        myAudio.pause();
-    }
+
 }
+
+
+
+
+
+
 
 // ......................................................
 // .......................UI Code........................
@@ -266,7 +409,8 @@ document.getElementById('join-room').onclick = function() {
 document.getElementById('open-or-join-room').onclick = function() {
     disableInputButtons();
     connection.openOrJoin(document.getElementById('room-id').value, function(isRoomExists, roomid) {
-        if (!isRoomExists) {
+        if (isRoomExists && connection.isInitiator) {
+            showRoomURL(roomid);
         }
     });
 };
@@ -333,12 +477,12 @@ document.getElementById('input-text-chat').onkeyup = function(e) {
 
     // removing trailing/leading whitespace
     this.value = this.value.replace(/^\s+|\s+$/g, '');
-
-    if (this.value.split(" ").includes("skype")) {
-        alert('sorry, you cant use this word');
-    }
     
     //if (!this.value.length) return;
+    if (wordInString(this.value, "skype")) {
+        alert('sorry, you cant use this word')
+        return false;
+    } else {
 
     connection.send({
         message: this.value,
@@ -351,13 +495,18 @@ document.getElementById('input-text-chat').onkeyup = function(e) {
     } else {
         appendDIV(this.value, lastMessageUUID, local_name, local_tz);
     }
+
+    }
+    
     lastMessageUUID = null;
     this.value = '';
 };
 
-var chatContainer = document.querySelector('.chat-output');
 
-function appendDIV(event, messageUUID, user=null, tz=null) {
+var chatContainer = document.querySelector('.chat-output');
+// var chatContainer = document.querySelector('.chat');
+
+function appendDIV(event, messageUUID, user=null, tz=null, dontSave=null) {
     var existing = false, div, datespan;
 
     datespan = document.createElement('span'); 
@@ -373,11 +522,21 @@ function appendDIV(event, messageUUID, user=null, tz=null) {
 
     if (user==null) {
         user = remote_name;
-        div.style = "padding:2px;margin-bottom:2px;";  //display:table;
+        div.style = "padding:2px;margin-bottom:2px;margin-left:10px;";  //display:table;
     } else {
-        div.style = "color:#838383;font-style:italic;padding:2px;margin-bottom:2px;";   // display:table;
-        //addMessage(event.data || event); //save db 
+        div.style = "color:#838383;font-style:italic;padding:2px;margin-bottom:2px;margin-left:10px;";   // display:table;   
+        if (dontSave) {
+            //
+        } else {
+            try {
+                //addMessage(event);
+            }catch(e){
+                //addMessage(event.data);
+            }
+        }
     }
+    // save db
+    
 
     if (false) {
         try {
@@ -445,7 +604,9 @@ var connection = new RTCMultiConnection();
 var calltype = "";
 
 connection.onSocketDisconnect(function() {
-    alert('socket was disconnected, please connect again');
+    //alert('socket was disconnected, please connect again');
+    document.getElementById('call-status').innerHTML = "Connection failed. Please reload the page and try again.";
+    document.getElementById('call-status').className = "alert alert-danger";
 });
 
 // by default, socket.io server is assumed to be deployed on your own roomURLsDiv
@@ -652,22 +813,22 @@ connection.onstream = function(event) {
     document.getElementById('mute-audio').style.display = "";
     document.getElementById("toggle-video").style.display = "";
 
-    if (event.stream.isScreen) {
-        //console.log('is screen');
-    }
+    // if (event.stream.isScreen) {
+    //     //console.log('is screen');
+    // }
 
-    if (event.stream.isAudio) {
-        //console.log('is audio');
-    }
+    // if (event.stream.isAudio) {
+    //     //console.log('is audio');
+    // }
 
-    if (event.stream.isVideo) {
-        if (event.stream.getAudioTracks().length && event.stream.getVideoTracks().length) {
-            //console.log('is audio+video');
-        } else {
-            //console.log('is video');
-        }
+    // if (event.stream.isVideo) {
+    //     if (event.stream.getAudioTracks().length && event.stream.getVideoTracks().length) {
+    //         //console.log('is audio+video');
+    //     } else {
+    //         //console.log('is video');
+    //     }
 
-    }
+    // }
 
     if (event.stream.isVideo) {
         var video = document.createElement('video');
@@ -786,6 +947,9 @@ connection.onSettingLocalDescription  = function(event){
     //console.log('Trying to connect with', event.userid);
 }
 
+function wordInString(s, word){
+  return new RegExp( '\\b' + word + '\\b', 'i').test(s);
+}
 
 function initHark(args) {
     if (!window.hark) {
@@ -864,7 +1028,7 @@ function createStreams(video,audio) {
         video: video,
         audio: audio
     });
-        document.getElementById("msg").innerHTML = connection.DetectRTC.browser.name + " - " + SelectedCameraId + " connected."
+        //document.getElementById("msg").innerHTML = connection.DetectRTC.browser.name + " - " + SelectedCameraId + " connected."
         IsInCall = true;
     }
     catch(e)
@@ -931,15 +1095,11 @@ connection.onmute = function(e) {
 }
 
 
-document.addEventListener("click", mainListener);
+//document.addEventListener("click", mainListener);
 
-function mainListener(event){
-    var element = event.target;
-
-    if(element.id == 'accepting-call'){
-    element.style.display = "none";
-	
-        calltype = element.getAttribute("call-type");
+document.getElementById("accepting-call").onclick = function(){
+    var  element = document.getElementById("accepting-call");
+    calltype = element.getAttribute("call-type");
         createStreams(true,true);
         if(calltype == "audio"){
             document.getElementById("toggle-video").classList.remove('btn-danger');
@@ -966,16 +1126,16 @@ function mainListener(event){
             calltype: calltype
         });
 }
-
-    if(element.id == 'refuse-call'){
-    element.style.display = "none";
+document.getElementById("refuse-call").onclick = function(){
+    var  element = document.getElementById("accepting-call");
+    // element.style.display = "none";
     sound2('stop');
-    modal.style.display = "none"; //hide modal
+    modal.style.display = "none";
+    connection.send({
+        callrejected: true,
+        calltype: calltype
+    });
 }
-}
-
-
-
 
 document.getElementById('hide-video').onclick = function() {    
     endStreams();
@@ -1014,10 +1174,14 @@ document.getElementById('call-video').onclick = function() {
     connection.send({
         videoCall: true,            
     });
+    sound2();
+    callingModal.style.display = "block";
 }
 
 document.getElementById('call-audio').onclick = function() {
     connection.send({ audioCall: true });
+    sound2();
+    callingModal.style.display = "block";
     return;
 }
 
@@ -1096,9 +1260,9 @@ connection.onmessage = function(event) {
         
         var btncall = document.getElementById("accepting-call");
         var btnend = document.getElementById("refuse-call");
-        var item = document.getElementById('call-wrap');
-        var icon = document.createElement('div');
-        icon.className = "icon sbicon-video-camera";
+        // var item = document.getElementById('call-wrap');
+        // var icon = document.createElement('div');
+        // icon.className = "icon sbicon-video-camera";
 
         if (btncall) {
             sound2(); //ringtone
@@ -1143,8 +1307,13 @@ connection.onmessage = function(event) {
         return;
 
     }
+    if(event.data.callrejected){
+        sound2('stop');
+        callingModal.style.display = "none";
+    }
     if (event.data.callaccepted) {
-
+        sound2('stop');
+        callingModal.style.display = "none";
         //document.getElementById('new-open-video').style.display = "none";
         // createStreams();
         calltype = event.data.calltype;
@@ -1224,6 +1393,9 @@ connection.onmessage = function(event) {
 connection.filesContainer = document.getElementById('file-container');
 
 connection.onopen = function(event) {
+
+    document.getElementById('room-urls').style.display = "none";
+
     document.getElementById('share-file').disabled = false;
     document.getElementById('input-text-chat').disabled = false;
     document.getElementById('btn-leave-room').disabled = false;
@@ -1232,13 +1404,18 @@ connection.onopen = function(event) {
     document.getElementById('call-video').disabled = false;
     document.getElementById('call-audio').disabled = false;
 
+
+    document.getElementById('call-status').innerHTML = "The other party is online!";
+    document.getElementById('call-status').className = "alert alert-success";
+
+
     local_name = connection.extra.name;
     remote_name = connection.peers[connection.getAllParticipants()[0]].extra.name;
 
     local_tz = connection.extra.tz;
     remote_tz = connection.peers[connection.getAllParticipants()[0]].extra.tz;
 
-    appendDIV(remote_name + translator.getStr("OnlineNow"), 'online-warn'+Math.floor(Math.random()*(999-100+1)+100), remote_name, local_tz);
+    appendDIV(remote_name + translator.getStr("OnlineNow"), 'online-warn'+Math.floor(Math.random()*(999-100+1)+100), remote_name, local_tz, true);
     //var warning_online = getElementById('online-warn').style.color = "#28a745";
 
     // document.getElementById('status-call').innerHTML = remote_name + translator.getStr("OnlineNow");
@@ -1255,7 +1432,7 @@ connection.onclose = function() {
         // document.getElementById("status-call").innerHTML = translator.getStr("NoOneOnline");
         // document.getElementById("status-call").style.color = "#212529";
         // document.getElementById("status-call").style.fontWeight = "400";
-        appendDIV(translator.getStr("NoOneOnline"), 'offline-warn'+Math.floor(Math.random()*(999-100+1)+100), remote_name, local_tz);
+        appendDIV(translator.getStr("NoOneOnline"), 'offline-warn'+Math.floor(Math.random()*(999-100+1)+100), remote_name, local_tz, true);
         //document.getElementById('new-open-video').style.display = "none";
 
         //document.getElementById('new-open-video').disabled = true;
@@ -1269,14 +1446,15 @@ connection.onclose = function() {
         document.getElementById('end-call').style.display = "none";
         document.getElementById('toggle-video').style.display = "none";
         
-        alert('Seems your connection failed. Refresh the page and try again.');
+        //alert('Seems your connection failed. Refresh the page and try again.');
+        document.getElementById('call-status').innerHTML = "Seems your connection failed. Refresh the page and try again.";
+        document.getElementById('call-status').className = "alert alert-danger";
     }
 
 };
 
 connection.onUserStatusChanged = function(event) {
     if (connection.userid != event.userid) {
-
         if (event.status=="offline") {
             var element = document.querySelectorAll('[data-userid="'+event.userid+'"]');
             //var element = document.querySelectorAll('[data-userid]');
@@ -1320,7 +1498,7 @@ connection.onUserIdAlreadyTaken = function(useridAlreadyTaken, yourNewUserId) {
 };
 
 function disableInputButtons() {
-    document.getElementById('open-or-join-room').disabled = true;
+    //document.getElementById('open-or-join-room').disabled = true;
     document.getElementById('open-room').disabled = true;
     document.getElementById('join-room').disabled = true;
     document.getElementById('room-id').disabled = true;
@@ -1329,6 +1507,21 @@ function disableInputButtons() {
 // ......................................................
 // ......................Handling Params................
 // ......................................................
+
+function showRoomURL(roomid) {
+    var roomHashURL = '#' + roomid;
+    var roomQueryStringURL = '?roomid=' + roomid;
+
+    var html = '<h4>Unique URL for your room:</h4><br>';
+
+    //html += 'Hash URL: <a href="' + roomHashURL + '" target="_blank">' + roomHashURL + '</a>';
+    //html += '<br>';
+    html += 'URL: <a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
+
+    var roomURLsDiv = document.getElementById('room-urls');
+    roomURLsDiv.innerHTML = html;
+    roomURLsDiv.style.display = 'block';
+}
 
 (function() {
     var params = {},
@@ -1401,8 +1594,11 @@ if (true) {
     
     document.getElementById("master-wrapper").style.display = "block";    
 
+    let names = ["Anonymous","JohnDoe","JamesGun","Norm"];
+    let randomGuy = names[Math.floor(Math.random()*names.length)];
+
     connection.extra = {
-        name: prompt("What is your nick?","Anonymous")
+        name: prompt("What is your nick?", randomGuy)
     };
 
     if (roomid && roomid.length) {
@@ -1414,6 +1610,9 @@ if (true) {
             connection.checkPresence(roomid, function(isRoomExists) {
                 if (isRoomExists) {
                     connection.join(roomid);
+                    return;
+                } else {
+                    connection.open(roomid);
                     return;
                 }
                 setTimeout(reCheckRoomPresence, 4000);
@@ -1456,6 +1655,10 @@ document.getElementById("call-audio").innerHTML = translator.getStr("CallAudio")
 document.getElementById("end-call").innerHTML = translator.getStr("EndCall");
 
 
+document.getElementById("incoming-call").innerHTML = translator.getStr("IncomingCall");
+document.getElementById("calling-call").innerHTML = translator.getStr("CallingCall");
+
+
 // if(navigator.connection &&
 //    navigator.connection.type === 'cellular' &&
 //    navigator.connection.downlinkMax <= 0.115) {
@@ -1472,8 +1675,9 @@ var LastTimestamp = null;
     }
         connection.peers[event.userid].gettingStats = true; // do not duplicate
         var peer = connection.peers[event.userid].peer;
-
-    getStats(peer)
+        if(!isSafari){
+            getStats(peer);
+        }
         }
         function getStats(peer) {
     setInterval(function(){
@@ -1492,6 +1696,7 @@ var LastTimestamp = null;
                 LastTimestamp = CurrentTimeStamp;
     }
             LastBytes = TotalBytes;
+
             if(Speed != 0){
                 html = "Speed: " + Speed + " bytes/second<br />";
                 $("#log-status").html(html);
