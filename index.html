@@ -199,8 +199,8 @@
         <span id="calling-call" class="calling-call">Calling</span>
         <br/><br/>          
         
-        <button class="btn btn-success btn-circle btn-lg btn-sm">
-            <div id="hang-up" class="icon sbicon-phone"></div>
+        <button id="refuse-call-owner" class="btn btn-danger btn-circle btn-lg btn-sm">
+            <div id="hang-up-owner" class="icon sbicon-phone-hang-up"></div>
         </button>
       </div>
       <div class="expired-wrapper"></div>
@@ -276,9 +276,12 @@ var callingModal = document.getElementById("callingModal");
             background-size: 80%;
         }
     </style>   
+    <div class="col-12">
+        <div id="call-timing"></div>
+    </div>
     <div class="grid"> 
         <div class="col-8_sm-12" id="videos-container"></div>
-        <div class="col">
+        <div class="col-4_sm-12">
             <div id="log-status"></div>
             <div class="panel panel-primary">
                 <div class="panel-heading">
@@ -336,7 +339,13 @@ var callingModal = document.getElementById("callingModal");
 <script src="/dev/getHTMLMediaElement.js"></script>
 <script src="/dev/FileBufferReader.js"></script>
 <script>
-var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+var userAgent = window.navigator.userAgent;
+var isSafari = /^((?!chrome|android).)*safari/i.test(userAgent);
+if (userAgent.match(/iPad/i) || userAgent.match(/iPhone/i)) {
+    var isMobileSafari = true;
+} else {
+    var isMobileSafari = false;
+}
 //Load simple.js File if browser is not safari
 if(!isSafari){
     document.write('<script src="/dev/simpleStats.js"><\/script>');    
@@ -385,11 +394,6 @@ if (isSafari) {
     }
 
 }
-
-
-
-
-
 
 
 // ......................................................
@@ -522,16 +526,18 @@ function appendDIV(event, messageUUID, user=null, tz=null, dontSave=null) {
 
     if (user==null) {
         user = remote_name;
-        div.style = "padding:2px;margin-bottom:2px;margin-left:10px;";  //display:table;
+        div.style = "padding:2px;margin-bottom:2px;margin-left:10px;overflow-wrap:break-word;";  //display:table;
     } else {
-        div.style = "color:#838383;font-style:italic;padding:2px;margin-bottom:2px;margin-left:10px;";   // display:table;   
+        div.style = "color:#838383;font-style:italic;padding:2px;margin-bottom:2px;margin-left:10px;overflow-wrap:break-word;";   // display:table;   
         if (dontSave) {
             //
         } else {
-            try {
-                //addMessage(event);
-            }catch(e){
-                //addMessage(event.data);
+            if (token) {
+                try {
+                    addMessage(event);
+                }catch(e){
+                    addMessage(event.data);
+                }
             }
         }
     }
@@ -791,6 +797,7 @@ connection.videosContainer = document.getElementById('videos-container');
 var localId = "";
 var remoteId = "";
 var IsInCall = false;
+var CallTiming = 0;
 
 connection.setUserPreferences = function(userPreferences) {
     if (connection.dontAttachStream) {
@@ -813,30 +820,13 @@ connection.onstream = function(event) {
     document.getElementById('mute-audio').style.display = "";
     document.getElementById("toggle-video").style.display = "";
 
-    // if (event.stream.isScreen) {
-    //     //console.log('is screen');
-    // }
-
-    // if (event.stream.isAudio) {
-    //     //console.log('is audio');
-    // }
-
-    // if (event.stream.isVideo) {
-    //     if (event.stream.getAudioTracks().length && event.stream.getVideoTracks().length) {
-    //         //console.log('is audio+video');
-    //     } else {
-    //         //console.log('is video');
-    //     }
-
-    // }
-
     if (event.stream.isVideo) {
         var video = document.createElement('video');
         video.controls = false;
         video.autoplay = true;
         video.playsinline = true;
 
-        if(connection.DetectRTC.browser.name == "Safari"){
+        if (isMobileSafari) {
             video.setAttribute('autoplay', '');
             video.setAttribute('muted', '');
             video.setAttribute('playsinline', '');
@@ -886,7 +876,19 @@ connection.onstream = function(event) {
         // }
 
          setTimeout(function() {
-                video.play();
+
+            var promise = video.play();
+            
+            if (promise !== undefined) {
+                promise.catch(error => {
+                    console.log('here',error);
+                    // Auto-play was prevented
+                    // Show a UI element to let the user manually start playback
+                }).then(() => {
+                    // Auto-play started
+                });
+            }
+                
         }, 2000);
 
         // for iOS Safari
@@ -1125,14 +1127,33 @@ document.getElementById("accepting-call").onclick = function(){
             callaccepted: true,
             calltype: calltype
         });
+        setInterval(function(){
+            CallTiming += 1;
+            var result = new Date(CallTiming * 1000).toISOString().substr(11, 8);
+            console.log(result)
+            $("#call-timing").html(result);
+        }, 1000);
 }
 document.getElementById("refuse-call").onclick = function(){
     var  element = document.getElementById("accepting-call");
     // element.style.display = "none";
     sound2('stop');
     modal.style.display = "none";
+
     connection.send({
         callrejected: true,
+        calltype: calltype
+    });
+}
+
+document.getElementById("refuse-call-owner").onclick = function(){
+    var  element = document.getElementById("callingModal");
+    // element.style.display = "none";
+    sound2('stop');
+    callingModal.style.display = "none";
+
+    connection.send({
+        callrejectedowner: true,
         calltype: calltype
     });
 }
@@ -1311,6 +1332,10 @@ connection.onmessage = function(event) {
         sound2('stop');
         callingModal.style.display = "none";
     }
+    if(event.data.callrejectedowner){
+        sound2('stop');
+        modal.style.display = "none";
+    }
     if (event.data.callaccepted) {
         sound2('stop');
         callingModal.style.display = "none";
@@ -1318,7 +1343,12 @@ connection.onmessage = function(event) {
         // createStreams();
         calltype = event.data.calltype;
         createStreams(true,true);
-
+        setInterval(function(){
+            CallTiming += 1;
+            var result = new Date(CallTiming * 1000).toISOString().substr(11, 8);
+            console.log(result);
+            $("#call-timing").html(result);            
+        }, 1000);
         if(calltype == "audio"){
             document.getElementById("toggle-video").classList.remove('btn-danger');
             document.getElementById("toggle-video").classList.add('btn-success');
@@ -1594,7 +1624,7 @@ if (true) {
     
     document.getElementById("master-wrapper").style.display = "block";    
 
-    let names = ["Anonymous","JohnDoe","JamesGun","Norm"];
+    let names = ["Anonymous","JohnDoe","JamesGun","Norm","Eve"];
     let randomGuy = names[Math.floor(Math.random()*names.length)];
 
     connection.extra = {
@@ -1667,19 +1697,22 @@ document.getElementById("calling-call").innerHTML = translator.getStr("CallingCa
 var interval = 3000;
 var LastBytes = 0.0;
 var LastTimestamp = null;
-    connection.onPeerStateChanged = function(event) {
-      if(event.iceConnectionState === 'connected' && event.signalingState === 'stable') {
+
+connection.onPeerStateChanged = function(event) {
+    if(event.iceConnectionState === 'connected' && event.signalingState === 'stable') {
         if(connection.peers[event.userid].gettingStats === true) {
           return;
         }
     }
-        connection.peers[event.userid].gettingStats = true; // do not duplicate
-        var peer = connection.peers[event.userid].peer;
-        if(!isSafari){
-            getStats(peer);
-        }
-        }
-        function getStats(peer) {
+
+    connection.peers[event.userid].gettingStats = true; // do not duplicate
+    var peer = connection.peers[event.userid].peer;
+    if(!isSafari){
+        getStats(peer);
+    }
+}
+
+function getStats(peer) {
     setInterval(function(){
         peer.getSimpleStats(function(result) {
             // getSimpleStats instead of getStats
@@ -1688,21 +1721,22 @@ var LastTimestamp = null;
             var Speed = (TotalBytes - LastBytes);
             if(LastTimestamp == null){
                 LastTimestamp = new Date().getTime();
-      }
+            }
             else{
                 CurrentTimeStamp = new Date().getTime();
                 var seconds = (CurrentTimeStamp - LastTimestamp) / 1000;
                 Speed = (Speed / seconds).toFixed(2)
                 LastTimestamp = CurrentTimeStamp;
-    }
+                                }
             LastBytes = TotalBytes;
 
-            if(Speed != 0){
+            //if(Speed != 0){
+            if(Speed < 100000){
                 html = "Speed: " + Speed + " bytes/second<br />";
                 $("#log-status").html(html);
-        }
-                    });
-          }, interval);
+                        }
+        });
+    }, interval);
 }
 
 function dragElement(elmnt) {
